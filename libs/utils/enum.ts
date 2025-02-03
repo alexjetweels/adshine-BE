@@ -13,6 +13,7 @@ export enum TokenType {
 export enum ErrorCode {
   INVALID_INPUT = 'ERR100',
   UNAUTHORIZED_TELEGRAM = 'ERR101',
+  NOT_FOUND = 'ERR102',
 }
 
 export enum WeatherCode {

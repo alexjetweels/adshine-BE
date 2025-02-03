@@ -9,6 +9,7 @@ import { CoreUserRegisterDto } from './dto/register.dto';
 import { AuthService } from './services/auth.service';
 import {
   responseLoginSuccess,
+  responseRefreshTokenSuccess,
   responseRegisterFail,
   responseRegisterSuccess,
 } from './response/schema';
@@ -23,12 +24,6 @@ import { CoreUserChangePasswordDto } from './dto/change-password.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // @Post('register')
-  // @ApiResponseCustom([responseRegisterSuccess, responseRegisterFail])
-  // async register(@Body() body: CoreUserRegisterDto) {
-  //   return this.authService.register(body);
-  // }
-
   @Post('login')
   @ApiResponseCustom([responseLoginSuccess])
   @HttpCode(HttpStatus.OK)
@@ -37,6 +32,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @ApiResponseCustom([responseRefreshTokenSuccess])
   @AuthRefreshToken()
   @HttpCode(HttpStatus.OK)
   async refreshToken() {
