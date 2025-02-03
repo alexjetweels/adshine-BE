@@ -18,5 +18,3 @@ RUN prisma generate
 RUN yarn build:core
 
 CMD yarn start:core:prod
-
-npx prisma migrate dev --create-only --name update_user_model
