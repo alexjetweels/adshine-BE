@@ -1,5 +1,4 @@
 import { WebAppUser } from 'apps/core/src/modules/users/user.type';
-import { WeatherCode } from './enum';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type Constructor<T = any, Arguments extends unknown[] = any[]> = new (
@@ -20,11 +19,4 @@ export type WebAppInitData = {
   start_param?: string;
   auth_date: string;
   hash: string;
-};
-
-export type WeatherData = {
-  id: number;
-  main: WeatherCode;
-  description: string;
-  icon: string;
 };

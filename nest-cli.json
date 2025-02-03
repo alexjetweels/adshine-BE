@@ -5,7 +5,17 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": false,
-    "tsConfigPath": "apps/core/tsconfig.app.json"
+    "tsConfigPath": "apps/core/tsconfig.app.json",
+    "plugins": [
+      {
+        "name": "@nestjs/swagger",
+        "options": {
+          "classValidatorShim": true,
+          "introspectComments": true,
+          "dtoFileNameSuffix": [".dto.ts"]
+        }
+      }
+    ]
   },
   "monorepo": true,
   "root": "apps/core",

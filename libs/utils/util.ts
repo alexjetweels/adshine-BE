@@ -1,10 +1,9 @@
 import { Logger } from '@nestjs/common';
+import { Config } from '@prisma/client';
 import axios, { AxiosError } from 'axios';
 import bcrypt from 'bcryptjs';
 import config from '../../assets/config.json';
-import { ConfigValueType, WeatherCode } from './enum';
-import { ConfigType } from '@nestjs/config';
-import { Config } from '@prisma/client';
+import { ConfigValueType } from './enum';
 
 /**
  * generate hash from password or string
@@ -209,94 +208,6 @@ export function levelOfUser(level: number): {
 } {
   const levelData = JSON.parse(JSON.stringify(config.levels[level]));
   return levelData;
-}
-
-export function coefficientOfWeather() {
-  const BaseWeatherCode = {
-    [WeatherCode.Clear]: WeatherCode.Clear,
-    [WeatherCode.Clouds]: WeatherCode.Clouds,
-    [WeatherCode.Rain]: WeatherCode.Rain,
-    [WeatherCode.Snow]: WeatherCode.Snow,
-    [WeatherCode.Thunderstorm]: WeatherCode.Thunderstorm,
-  };
-
-  return {
-    [WeatherCode.Clear]: {
-      bonusCoin: 50,
-      weatherCoefficient: 0.01,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Clear],
-    },
-    [WeatherCode.Clouds]: {
-      bonusCoin: 80,
-      weatherCoefficient: 0.02,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Clouds],
-    },
-    [WeatherCode.Rain]: {
-      bonusCoin: 200,
-      weatherCoefficient: 0.05,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Rain],
-    },
-    [WeatherCode.Snow]: {
-      bonusCoin: 300,
-      weatherCoefficient: 0.05,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Snow],
-    },
-    [WeatherCode.Thunderstorm]: {
-      bonusCoin: 500,
-      weatherCoefficient: 0.09,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Thunderstorm],
-    },
-    [WeatherCode.Drizzle]: {
-      bonusCoin: 200,
-      weatherCoefficient: 0.05,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Rain],
-    },
-    [WeatherCode.Mist]: {
-      bonusCoin: 80,
-      weatherCoefficient: 0.02,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Clouds],
-    },
-    [WeatherCode.Smoke]: {
-      bonusCoin: 80,
-      weatherCoefficient: 0.02,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Clouds],
-    },
-    [WeatherCode.Haze]: {
-      bonusCoin: 80,
-      weatherCoefficient: 0.02,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Clouds],
-    },
-    [WeatherCode.Dust]: {
-      bonusCoin: 500,
-      weatherCoefficient: 0.09,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Thunderstorm],
-    },
-    [WeatherCode.Sand]: {
-      bonusCoin: 500,
-      weatherCoefficient: 0.09,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Thunderstorm],
-    },
-    [WeatherCode.Fog]: {
-      bonusCoin: 80,
-      weatherCoefficient: 0.02,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Clouds],
-    },
-    [WeatherCode.Ash]: {
-      bonusCoin: 500,
-      weatherCoefficient: 0.09,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Thunderstorm],
-    },
-    [WeatherCode.Squall]: {
-      bonusCoin: 500,
-      weatherCoefficient: 0.09,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Thunderstorm],
-    },
-    [WeatherCode.Tornado]: {
-      bonusCoin: 500,
-      weatherCoefficient: 0.09,
-      baseWeatherCode: BaseWeatherCode[WeatherCode.Thunderstorm],
-    },
-  };
 }
 
 export function getRandomPoint(

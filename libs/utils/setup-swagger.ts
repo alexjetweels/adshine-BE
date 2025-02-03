@@ -3,7 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 export const setupSwagger = (app: INestApplication): void => {
   const documentBuilder = new DocumentBuilder()
-    .setTitle('API Weather')
+    .setTitle('API Adshine')
     .setVersion('1.0')
     .addBearerAuth();
 

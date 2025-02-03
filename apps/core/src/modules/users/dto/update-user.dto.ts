@@ -12,6 +12,7 @@ export class CoreUpdateUserDto {
   @ApiProperty({
     description: 'User email address, should be a valid email format',
     example: 'user@example.com',
+    required: false,
   })
   @IsOptional()
   @IsEmail()
@@ -20,6 +21,7 @@ export class CoreUpdateUserDto {
   @ApiProperty({
     description: 'User name, should not exceed 50 characters',
     example: 'John Doe',
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -29,6 +31,7 @@ export class CoreUpdateUserDto {
   @ApiProperty({
     description: 'reset password',
     example: true,
+    required: false,
   })
   @IsOptional()
   @IsBoolean()
@@ -37,6 +40,7 @@ export class CoreUpdateUserDto {
   @ApiProperty({
     description: 'block user',
     example: true,
+    required: false,
   })
   @IsOptional()
   @IsBoolean()

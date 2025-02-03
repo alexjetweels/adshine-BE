@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-    IsEmail,
-    IsNotEmpty,
-    IsOptional,
-    IsString,
-    MaxLength
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
 } from 'class-validator';
 
 export class CoreCreateUserDto {
@@ -19,6 +19,7 @@ export class CoreCreateUserDto {
   @ApiProperty({
     description: 'User name, should not exceed 50 characters',
     example: 'John Doe',
+    required: false,
   })
   @IsOptional()
   @IsString()
