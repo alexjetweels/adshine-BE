@@ -14,7 +14,7 @@ export class TokenService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  private async createAccessToken(data: { role: Role; userId: number }) {
+  private async createAccessToken(data: { role: Role; userId: bigint }) {
     return await this.jwtService.signAsync(
       {
         userId: data.userId,
@@ -25,7 +25,7 @@ export class TokenService {
     );
   }
 
-  private async createRefreshToken(data: { role: Role; userId: number }) {
+  private async createRefreshToken(data: { role: Role; userId: bigint }) {
     return await this.jwtService.signAsync(
       {
         userId: data.userId,
