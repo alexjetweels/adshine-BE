@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { Role, StatusOrder, User } from '@prisma/client';
+import { Prisma, Role, StatusOrder, User } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ErrorCode } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
@@ -14,29 +14,31 @@ import { map } from 'lodash';
 export class OrdersService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(body: CreateOrderDto) {
-    const user = ContextProvider.getAuthUser<User>();
-
-    const { orderItems, ...order } = body;
-
-    // Check order items with product
-    const productIds = orderItems.map((item) => item.productId);
+  async checkProductExist(productIds: bigint[]) {
     const products = await this.prismaService.product.findMany({
       where: {
         id: {
           in: productIds,
         },
+        status: StatusOrder.ACTIVE,
       },
     });
 
-    // if not exist throw error
-    if (productIds.length !== products.length) {
+    if (products.length !== productIds.length) {
       throw new ApiException(
         'Product not found',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
     }
+  }
+
+  async create(body: CreateOrderDto) {
+    const user = ContextProvider.getAuthUser<User>();
+
+    const { orderItems, ...order } = body;
+
+    await this.checkProductExist(orderItems.map((item) => item.productId));
 
     const newOrder = await this.prismaService.order.create({
       data: {
@@ -78,6 +80,10 @@ export class OrdersService {
       if (query.endTime) {
         where.createdAt['lte'] = query.endTime;
       }
+    }
+
+    if (query.status) {
+      where.status = query.status;
     }
 
     const records = await this.prismaService.order.findMany({
@@ -125,12 +131,53 @@ export class OrdersService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findOne(id: number) {
+    return this.prismaService.order.findFirst({
+      where: { id, status: StatusOrder.ACTIVE },
+    });
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  async update(id: number, body: UpdateOrderDto) {
+    const orderCurrent = await this.findOne(id);
+
+    if (!orderCurrent) {
+      throw new ApiException(
+        'Order not found',
+        HttpStatus.NOT_FOUND,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    const { orderItems, ...order } = body;
+
+    await this.prismaService.order.update({
+      where: { id },
+      data: order,
+    });
+
+    if (orderItems?.length) {
+      const { productIds, newOrderItems } = orderItems.reduce(
+        (acc, item) => {
+          acc.productIds.push(item.productId);
+          acc.newOrderItems.push({
+            ...item,
+            orderId: id,
+          });
+          return acc;
+        },
+        {
+          productIds: [] as bigint[],
+          newOrderItems: [] as Prisma.OrderItemCreateManyInput[],
+        },
+      );
+      await this.checkProductExist(productIds);
+      await this.prismaService.orderItem.deleteMany({ where: { orderId: id } });
+      await this.prismaService.orderItem.createMany({
+        data: newOrderItems,
+      });
+    }
+
+    return body;
   }
 
   remove(id: number) {
