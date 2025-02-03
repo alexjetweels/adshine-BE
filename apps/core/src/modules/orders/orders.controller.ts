@@ -21,6 +21,7 @@ import {
   responseListOrderSuccess,
 } from './response/schema';
 import { ListOrderDto } from './dto/list-order.dto';
+import { RoleType } from 'libs/utils/enum';
 
 @CoreControllers({
   path: 'orders',
@@ -51,13 +52,11 @@ export class OrdersController {
   //   return this.ordersService.findOne(+id);
   // }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-  //   return this.ordersService.update(+id, updateOrderDto);
-  // }
-
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.ordersService.remove(+id);
-  // }
+  @Auth([RoleType.ADMIN])
+  @Patch(':id')
+  @ApiResponseCustom([])
+  @HttpCode(HttpStatus.OK)
+  update(@Param('id') id: number, @Body() body: UpdateOrderDto) {
+    return this.ordersService.update(id, body);
+  }
 }

@@ -6,7 +6,7 @@ import { CreateProductDto } from './create-product.dto';
 export class UpdateProductDto extends PartialType(CreateProductDto) {
   @ApiProperty({
     description: 'inactive product',
-    example: true,
+    example: 'INACTIVE',
     required: false,
   })
   @IsOptional()

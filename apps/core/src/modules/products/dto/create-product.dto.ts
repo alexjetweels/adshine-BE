@@ -10,7 +10,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductDto {
   @ApiProperty({
-    description: 'The category of the product',
+    description: 'The category of the product, unique to the product',
     example: 'Electronics',
   })
   @IsNotEmpty()

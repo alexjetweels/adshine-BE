@@ -18,7 +18,7 @@ export class OrderItemDto {
   })
   @IsNotEmpty()
   @IsInt()
-  productId: number;
+  productId: bigint;
 
   @ApiProperty({
     description: 'The quantity of the product',
