@@ -101,12 +101,13 @@ enum StatusOrder {
 }
 
 model Order {
-  id         BigInt      @id @default(autoincrement())
-  userId     BigInt      @db.BigInt
-  totalPrice BigInt      @default(0)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  status     StatusOrder @default(ACTIVE)
+  id          BigInt      @id @default(autoincrement())
+  userId      BigInt      @db.BigInt
+  totalPrice  BigInt      @default(0)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  status      StatusOrder @default(ACTIVE)
+  description String?     @db.Text
 
   user       User        @relation(fields: [userId], references: [id])
   orderItems OrderItem[]
@@ -115,7 +116,6 @@ model Order {
 }
 
 model OrderItem {
-  id        BigInt @id @default(autoincrement())
   orderId   BigInt @db.BigInt
   productId BigInt @db.BigInt
   quantity  Int    @default(1)
@@ -124,5 +124,6 @@ model OrderItem {
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  @@id([orderId, productId])
   @@map("order_items")
 }

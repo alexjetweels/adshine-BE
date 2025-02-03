@@ -47,7 +47,7 @@ export class ProductsService {
         { category: { contains: query.search, mode: 'insensitive' } },
       ];
     }
-    console.log('query', query);
+
     if (query.status) {
       where.status = query.status;
     }
@@ -89,7 +89,7 @@ export class ProductsService {
       throw new ApiException(
         'Product not found',
         HttpStatus.NOT_FOUND,
-        ErrorCode.NOT_FOUND,
+        ErrorCode.INVALID_INPUT,
       );
     }
 
@@ -100,5 +100,4 @@ export class ProductsService {
 
     return body;
   }
-
 }

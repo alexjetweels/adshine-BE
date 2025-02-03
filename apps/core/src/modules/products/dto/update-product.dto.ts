@@ -7,6 +7,7 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
   @ApiProperty({
     description: 'inactive product',
     example: true,
+    required: false,
   })
   @IsOptional()
   @IsEnum(StatusProduct)

@@ -16,24 +16,6 @@ export enum ErrorCode {
   NOT_FOUND = 'ERR102',
 }
 
-export enum WeatherCode {
-  Thunderstorm = 'Thunderstorm',
-  Drizzle = 'Drizzle',
-  Rain = 'Rain',
-  Snow = 'Snow',
-  Clear = 'Clear',
-  Clouds = 'Clouds',
-  Mist = 'Mist',
-  Smoke = 'Smoke',
-  Haze = 'Haze',
-  Dust = 'Dust',
-  Sand = 'Sand',
-  Fog = 'Fog',
-  Ash = 'Ash',
-  Squall = 'Squall',
-  Tornado = 'Tornado',
-}
-
 export const COEFFICIENT = 1;
 
 export enum ConfigValueType {

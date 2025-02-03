@@ -4,6 +4,7 @@ import {
   IsNumber,
   MaxLength,
   IsOptional,
+  IsInt,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -20,6 +21,7 @@ export class CreateProductDto {
   @ApiProperty({
     description: 'The name of the product',
     example: 'Example Product',
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -29,6 +31,7 @@ export class CreateProductDto {
   @ApiProperty({
     description: 'The description of the product',
     example: 'This is an example product description.',
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -38,16 +41,18 @@ export class CreateProductDto {
   @ApiProperty({
     description: 'The price of the product',
     example: 1000,
+    required: false,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   price?: number;
 
   @ApiProperty({
     description: 'The available stock quantity of the product',
     example: 50,
+    required: false,
   })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   stock?: number;
 }
