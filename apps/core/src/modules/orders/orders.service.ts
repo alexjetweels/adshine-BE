@@ -59,7 +59,7 @@ export class OrdersService {
     const where = {} as {
       OR?: object[];
       status?: StatusOrder;
-      userId?: number;
+      userId?: bigint;
       createdAt?: {
         gte?: Date;
         lte?: Date;
