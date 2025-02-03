@@ -53,3 +53,19 @@ export const responseLoginSuccess: ApiResponseOptions = {
     },
   },
 };
+
+export const responseRefreshTokenSuccess: ApiResponseOptions = {
+  status: HttpStatus.OK,
+  description: 'Response login success example',
+  schema: {
+    example: {
+      data: {
+        accessToken:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInR5cGUiOiJBQ0NFU1NfVE9LRU4iLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3Mzg1NDY0NDgsImV4cCI6MTczODYzMjg0OH0.0pryYKt54lyaW4OcMwspHomG3fu4wdT_sElix3sWGJg',
+      },
+      timestamp: '03/02/2025 08:34:08',
+      path: '/api/core/v1/auth/refresh',
+      traceId: '2ba0070e-23a5-410b-b520-2042f89e59c9',
+    },
+  },
+};

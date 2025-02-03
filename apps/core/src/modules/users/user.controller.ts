@@ -4,25 +4,23 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  Patch,
   Post,
-  Query,
+  Query
 } from '@nestjs/common';
 import { Auth } from 'libs/utils';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
-import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
-import { UserService } from './user.service';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
+import { RoleType } from 'libs/utils/enum';
+import { CoreCreateUserDto } from './dto/create-user.dto';
+import { ListUserDto } from './dto/list-user.dto';
+import { CoreUpdateUserDto } from './dto/update-user.dto';
 import {
   responseCreateUserSuccess,
   responseGetListUserSuccess,
   responseMeSuccess,
   responseUpdateUserSuccess,
 } from './response/schema';
-import { RoleType } from 'libs/utils/enum';
-import { ListUserDto } from './dto/list-user.dto';
-import { CoreCreateUserDto } from './dto/create-user.dto';
-import { CoreUpdateUserDto } from './dto/update-user.dto';
+import { UserService } from './user.service';
 
 @CoreControllers({
   path: 'users',
@@ -41,7 +39,7 @@ export class UserController {
   }
 
   @Auth([RoleType.ADMIN])
-  @Get('')
+  @Get()
   @ApiResponseCustom([responseGetListUserSuccess])
   @HttpCode(HttpStatus.OK)
   async getListUser(@Query() query: ListUserDto) {
@@ -49,7 +47,7 @@ export class UserController {
   }
 
   @Auth([RoleType.ADMIN])
-  @Post('')
+  @Post()
   @ApiResponseCustom([responseCreateUserSuccess])
   @HttpCode(HttpStatus.CREATED)
   async createUser(@Body() body: CoreCreateUserDto) {

@@ -1,16 +1,13 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { WebAppUser } from './user.type';
-import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { Role, User } from '@prisma/client';
-import { ContextProvider } from 'libs/utils/providers/context.provider';
-import { UpdateUserProfileDto } from './dto/update-user-profile.dto';
-import { map, omit, pick } from 'lodash';
-import TonWeb from 'tonweb';
-import { ListUserDto } from './dto/list-user.dto';
-import { generateHash, randomPassword, schemaPaging } from 'libs/utils/util';
-import { CoreCreateUserDto } from './dto/create-user.dto';
-import { ApiException } from 'libs/utils/exception';
+import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ErrorCode } from 'libs/utils/enum';
+import { ApiException } from 'libs/utils/exception';
+import { ContextProvider } from 'libs/utils/providers/context.provider';
+import { generateHash, randomPassword, schemaPaging } from 'libs/utils/util';
+import { map, omit } from 'lodash';
+import { CoreCreateUserDto } from './dto/create-user.dto';
+import { ListUserDto } from './dto/list-user.dto';
 import { CoreUpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
@@ -25,18 +22,18 @@ export class UserService {
     };
   }
 
-  async updateUserProfile(dto: UpdateUserProfileDto) {
-    const user = ContextProvider.getAuthUser<User>();
+  // async updateUserProfile(dto: UpdateUserProfileDto) {
+  //   const user = ContextProvider.getAuthUser<User>();
 
-    await this.prismaService.user.update({
-      where: {
-        id: user.id,
-      },
-      data: {
-        ...pick(dto, ['cityId']),
-      },
-    });
-  }
+  //   await this.prismaService.user.update({
+  //     where: {
+  //       id: user.id,
+  //     },
+  //     data: {
+  //       ...pick(dto, ['cityId']),
+  //     },
+  //   });
+  // }
 
   async getListUser(query: ListUserDto) {
     const where = {

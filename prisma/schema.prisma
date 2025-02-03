@@ -29,11 +29,11 @@ model User {
   role      Role     @default(USER)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  Order     Order[]
 
   @@index([email])
   @@map("users")
 }
-
 
 enum ValueType {
   NUMBER
@@ -72,4 +72,57 @@ model LogAction {
   updatedAt DateTime        @updatedAt
 
   @@map("log_actions")
+}
+
+enum StatusProduct {
+  INACTIVE
+  ACTIVE
+}
+
+model Product {
+  id          BigInt        @id @default(autoincrement())
+  category    String        @unique @db.VarChar(255)
+  name        String?       @db.VarChar(255)
+  description String?       @db.Text
+  price       BigInt?       @default(0)
+  stock       BigInt?       @default(0)
+  status      StatusProduct @default(ACTIVE)
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  OrderItem OrderItem[]
+
+  @@map("products")
+}
+
+enum StatusOrder {
+  INACTIVE
+  ACTIVE
+}
+
+model Order {
+  id         BigInt      @id @default(autoincrement())
+  userId     BigInt      @db.BigInt
+  totalPrice BigInt      @default(0)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  status     StatusOrder @default(ACTIVE)
+
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        BigInt @id @default(autoincrement())
+  orderId   BigInt @db.BigInt
+  productId BigInt @db.BigInt
+  quantity  Int    @default(1)
+  price     BigInt @default(0)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
 }
