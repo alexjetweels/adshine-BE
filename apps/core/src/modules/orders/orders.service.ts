@@ -133,7 +133,7 @@ export class OrdersService {
 
   async findOne(id: number) {
     return this.prismaService.order.findFirst({
-      where: { id, status: StatusOrder.ACTIVE },
+      where: { id },
     });
   }
 
