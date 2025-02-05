@@ -13,11 +13,17 @@ import { Prisma, StatusProduct } from '@prisma/client';
 export class ProductsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findByCategory(category: string) {
+  async findByCategory(category: string, idExclude?: number) {
+    const where = { category } as Prisma.ProductWhereInput;
+
+    if (idExclude) {
+      where.id = {
+        not: idExclude,
+      };
+    }
+
     return await this.prismaService.product.findFirst({
-      where: {
-        category,
-      },
+      where,
     });
   }
   async create(body: CreateProductDto) {
@@ -91,6 +97,18 @@ export class ProductsService {
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
+    }
+
+    if (body.category) {
+      const isExist = await this.findByCategory(body.category, id);
+
+      if (isExist) {
+        throw new ApiException(
+          'Product category existing',
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
     }
 
     await this.prismaService.product.update({
