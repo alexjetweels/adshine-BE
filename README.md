@@ -86,7 +86,7 @@ prisma migrate dev
 yarn start:core:dev
 
 
-
-docker build -f ./apps/core/Dockerfile -t be-catbox .
+## build with docker
+docker build -f ./apps/core/Dockerfile -t be-app .
 docker-compose down
 docker-compose up -d
