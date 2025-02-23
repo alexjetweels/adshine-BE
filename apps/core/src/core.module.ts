@@ -14,6 +14,7 @@ import { LogActionMiddleware } from 'libs/utils/middlewares/log-action.middlewar
 import { InitDataModule } from 'libs/modules/init-data/init-data.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 const applications = [HealthModule, AuthModule, UserModule];
 
@@ -43,6 +44,7 @@ const applications = [HealthModule, AuthModule, UserModule];
     ...applications,
     ProductsModule,
     OrdersModule,
+    NotificationsModule,
   ],
 })
 export class CoreModule {

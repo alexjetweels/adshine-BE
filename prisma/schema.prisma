@@ -127,3 +127,27 @@ model OrderItem {
   @@id([orderId, productId])
   @@map("order_items")
 }
+
+enum NotificationType {
+  ALL_USER
+}
+
+enum NotificationStatus {
+  HIDE
+  SHOW
+}
+
+model Notification {
+  id        String             @id @default(uuid())
+  title     String?             @db.VarChar(255)
+  content   String             @db.Text
+  type      NotificationType   @default(ALL_USER)
+  status    NotificationStatus @default(SHOW)
+  iconType  String?            @db.VarChar(50)
+  iconUrl   String?            @db.VarChar(255)
+  createBy  BigInt             @db.BigInt
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  @@map("notifications")
+}
