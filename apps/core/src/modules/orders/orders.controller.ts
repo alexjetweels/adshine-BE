@@ -1,27 +1,25 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  Delete,
+  Get,
   HttpCode,
   HttpStatus,
-  Query,
+  Param,
+  Patch,
+  Post,
+  Query
 } from '@nestjs/common';
-import { OrdersService } from './orders.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
+import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
+import { AuthV2 } from 'libs/utils';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
-import { Auth } from 'libs/utils';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { ListOrderDto } from './dto/list-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
+import { OrdersService } from './orders.service';
 import {
   responseCreateOrderSuccess,
   responseListOrderSuccess,
 } from './response/schema';
-import { ListOrderDto } from './dto/list-order.dto';
-import { RoleType } from 'libs/utils/enum';
 
 @CoreControllers({
   path: 'orders',
@@ -31,7 +29,7 @@ import { RoleType } from 'libs/utils/enum';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @Auth()
+  @AuthV2([PERMISSION_KEYS.ORDER_CREATE])
   @Post()
   @ApiResponseCustom([responseCreateOrderSuccess])
   @HttpCode(HttpStatus.CREATED)
@@ -39,7 +37,7 @@ export class OrdersController {
     return this.ordersService.create(body);
   }
 
-  @Auth()
+  @AuthV2()
   @Get()
   @ApiResponseCustom([responseListOrderSuccess])
   @HttpCode(HttpStatus.OK)
@@ -47,12 +45,7 @@ export class OrdersController {
     return this.ordersService.findAll(query);
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.ordersService.findOne(+id);
-  // }
-
-  @Auth([RoleType.ADMIN])
+  @AuthV2()
   @Patch(':id')
   @ApiResponseCustom([])
   @HttpCode(HttpStatus.OK)

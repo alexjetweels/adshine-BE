@@ -1,20 +1,17 @@
 import { Body, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { Auth, AuthRefreshToken } from 'libs/utils';
+import { AuthRefreshToken, AuthV2 } from 'libs/utils';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
 import { ContextProvider } from 'libs/utils/providers/context.provider';
 import { responseSuccessBasic } from 'libs/utils/schema';
-import { CoreUserRegisterDto } from './dto/register.dto';
-import { AuthService } from './services/auth.service';
+import { CoreUserChangePasswordDto } from './dto/change-password.dto';
+import { CoreUserLoginDto } from './dto/login.dto';
 import {
   responseLoginSuccess,
-  responseRefreshTokenSuccess,
-  responseRegisterFail,
-  responseRegisterSuccess,
+  responseRefreshTokenSuccess
 } from './response/schema';
-import { CoreUserLoginDto } from './dto/login.dto';
-import { CoreUserChangePasswordDto } from './dto/change-password.dto';
+import { AuthService } from './services/auth.service';
 
 @CoreControllers({
   path: 'auth',
@@ -41,7 +38,7 @@ export class AuthController {
     return this.authService.generateNewToken(user, true);
   }
 
-  @Auth()
+  @AuthV2()
   @ApiResponseCustom([responseSuccessBasic])
   @Patch('change-password')
   @HttpCode(HttpStatus.OK)

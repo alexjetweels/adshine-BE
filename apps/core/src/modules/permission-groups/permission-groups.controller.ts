@@ -1,28 +1,28 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
-  Query,
+  Param,
+  Patch,
+  Post,
+  Query
 } from '@nestjs/common';
-import { PermissionGroupsService } from './permission-groups.service';
-import { CreatePermissionGroupDto } from './dto/create-permission-group.dto';
-import { UpdatePermissionGroupDto } from './dto/update-permission-group.dto';
+import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
+import { AuthV2 } from 'libs/utils';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
-import { Auth } from 'libs/utils';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
+import { responseSuccessBasic } from 'libs/utils/schema';
+import { CreatePermissionGroupDto } from './dto/create-permission-group.dto';
+import { ListPermissionGroupDto } from './dto/list-notifation.dto';
+import { UpdatePermissionGroupDto } from './dto/update-permission-group.dto';
+import { PermissionGroupsService } from './permission-groups.service';
 import {
   responseCreatePermissionGroupSuccess,
-  responseListPermissionGroupSuccess,
   responseDetailPermissionGroupSuccess,
+  responseListPermissionGroupSuccess,
 } from './response/schema';
-import { ListPermissionGroupDto } from './dto/list-notifation.dto';
-import { responseSuccessBasic } from 'libs/utils/schema';
 
 @CoreControllers({
   path: 'permission-groups',
@@ -34,7 +34,7 @@ export class PermissionGroupsController {
     private readonly permissionGroupsService: PermissionGroupsService,
   ) {}
 
-  @Auth()
+  @AuthV2([PERMISSION_KEYS.PERMISSION_GROUP_CREATE])
   @Post()
   @ApiResponseCustom([responseCreatePermissionGroupSuccess])
   @HttpCode(HttpStatus.CREATED)
@@ -42,7 +42,7 @@ export class PermissionGroupsController {
     return this.permissionGroupsService.create(createPermissionGroupDto);
   }
 
-  @Auth()
+  @AuthV2([PERMISSION_KEYS.PERMISSION_GROUP_VIEW])
   @Get()
   @ApiResponseCustom([responseListPermissionGroupSuccess])
   @HttpCode(HttpStatus.OK)
@@ -50,7 +50,7 @@ export class PermissionGroupsController {
     return this.permissionGroupsService.findAll(listPermissionGroupDto);
   }
 
-  @Auth()
+  @AuthV2([PERMISSION_KEYS.PERMISSION_GROUP_VIEW])
   @Get(':id')
   @ApiResponseCustom([responseDetailPermissionGroupSuccess])
   @HttpCode(HttpStatus.OK)
@@ -58,7 +58,7 @@ export class PermissionGroupsController {
     return this.permissionGroupsService.findOne(id);
   }
 
-  @Auth()
+  @AuthV2([PERMISSION_KEYS.PERMISSION_GROUP_UPDATE])
   @Patch(':id')
   @ApiResponseCustom([responseDetailPermissionGroupSuccess])
   @HttpCode(HttpStatus.OK)
@@ -69,7 +69,7 @@ export class PermissionGroupsController {
     return this.permissionGroupsService.update(id, updatePermissionGroupDto);
   }
 
-  @Auth()
+  @AuthV2([PERMISSION_KEYS.PERMISSION_GROUP_DELETE])
   @Delete(':id')
   @ApiResponseCustom([responseSuccessBasic])
   @HttpCode(HttpStatus.OK)

@@ -7,18 +7,17 @@ export const responseMeSuccess: ApiResponseOptions = {
   schema: {
     example: {
       data: {
-        id: 1,
-        name: 'name',
-        email: 'example@gmail.com',
-        photoUrl: null,
+        id: 22,
+        email: 'user16@gmail.com',
+        name: 'user16',
         isBan: false,
-        role: 'USER',
-        createdAt: '2025-02-02T13:48:24.684Z',
-        updatedAt: '2025-02-02T14:15:11.708Z',
+        createdAt: '2025-02-24T16:51:45.589Z',
+        updatedAt: '2025-02-24T16:51:45.589Z',
+        permissions: ['NOTIFICATION_CREATE', 'NOTIFICATION_UPDATE'],
       },
-      timestamp: '02/02/2025 21:20:12',
+      timestamp: '25/02/2025 00:01:19',
       path: '/api/core/v1/users/me',
-      traceId: 'bb7ef985-838d-4802-a9bd-554f9436a2fb',
+      traceId: '635343d5-515b-4f83-af51-91582cc73faa',
     },
   },
 };

@@ -14,7 +14,7 @@ import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
-import { Auth } from 'libs/utils';
+import { Auth, AuthV2 } from 'libs/utils';
 import { RoleType } from 'libs/utils/enum';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
 import {
@@ -22,6 +22,7 @@ import {
   responseListNotificationSuccess,
 } from './response/schema';
 import { ListNotificationDto } from './dto/list-notifation.dto';
+import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 
 @CoreControllers({
   path: 'notifications',
@@ -31,7 +32,7 @@ import { ListNotificationDto } from './dto/list-notifation.dto';
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
-  @Auth([RoleType.ADMIN])
+  @AuthV2([PERMISSION_KEYS.NOTIFICATION_CREATE])
   @Post()
   @ApiResponseCustom([responseCreateNotificationSuccess])
   @HttpCode(HttpStatus.CREATED)
@@ -39,7 +40,7 @@ export class NotificationsController {
     return this.notificationsService.create(createNotificationDto);
   }
 
-  @Auth()
+  @AuthV2()
   @Get()
   @ApiResponseCustom([responseListNotificationSuccess])
   @HttpCode(HttpStatus.OK)
@@ -47,7 +48,7 @@ export class NotificationsController {
     return this.notificationsService.findAll(listNotificationDto);
   }
 
-  @Auth([RoleType.ADMIN])
+  @AuthV2([PERMISSION_KEYS.NOTIFICATION_CREATE])
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   update(

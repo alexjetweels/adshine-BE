@@ -14,6 +14,69 @@ import { CoreUpdateUserDto } from './dto/update-user.dto';
 export class UserService {
   constructor(private readonly prismaService: PrismaService) {}
 
+  async findOne(userId: number) {
+    const user = await this.prismaService.user.findFirst({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        isBan: true,
+        createdAt: true,
+        UserPermissionGroup: {
+          select: {
+            permissionGroup: {
+              select: {
+                id: true,
+                name: true,
+                permissions: {
+                  select: {
+                    permission: {
+                      select: {
+                        id: true,
+                        description: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new ApiException(
+        'User not found',
+        HttpStatus.NOT_FOUND,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    const permissionsUser = new Set<string>();
+    const data = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      isBan: user.isBan,
+      createdAt: user.createdAt,
+      permissionGroups: user.UserPermissionGroup.map((pg) => ({
+        id: pg.permissionGroup.id,
+        name: pg.permissionGroup.name,
+        permissions: pg.permissionGroup.permissions.map((p) => {
+          permissionsUser.add(p.permission.id);
+          return {
+            id: p.permission.id,
+            description: p.permission.description,
+          };
+        }),
+      })),
+    };
+
+    return { ...data, permissionsUser: Array.from(permissionsUser) };
+  }
+
   async getUserInfo() {
     const user = ContextProvider.getAuthUser<User>();
 
@@ -21,19 +84,6 @@ export class UserService {
       ...omit(user, ['password']),
     };
   }
-
-  // async updateUserProfile(dto: UpdateUserProfileDto) {
-  //   const user = ContextProvider.getAuthUser<User>();
-
-  //   await this.prismaService.user.update({
-  //     where: {
-  //       id: user.id,
-  //     },
-  //     data: {
-  //       ...pick(dto, ['cityId']),
-  //     },
-  //   });
-  // }
 
   async getListUser(query: ListUserDto) {
     const where = {
@@ -81,7 +131,8 @@ export class UserService {
     return this.prismaService.user.findFirst({ where: { email } });
   }
 
-  async createUser(body: CoreCreateUserDto) {
+  async createUser({ permissionGroupIds, ...body }: CoreCreateUserDto) {
+    const user = ContextProvider.getAuthUser<User>();
     const existingUser = await this.getUserByEmail(body.email);
 
     if (existingUser) {
@@ -100,14 +151,45 @@ export class UserService {
       name: body.name || 'Default Name',
     };
 
-    await this.prismaService.user.create({
-      data,
-    });
+    return this.prismaService.$transaction(async (prisma) => {
+      const newUser = await prisma.user.create({
+        data,
+      });
 
-    return { ...data, password };
+      if (permissionGroupIds?.length) {
+        const permissionGroups = await prisma.permissionGroup.count({
+          where: {
+            id: {
+              in: permissionGroupIds,
+            },
+          },
+        });
+
+        if (permissionGroups !== permissionGroupIds.length) {
+          throw new ApiException(
+            'Permission group not found',
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.INVALID_INPUT,
+          );
+        }
+
+        await prisma.userPermissionGroup.createMany({
+          data: permissionGroupIds.map((permissionGroupId) => ({
+            userId: newUser.id,
+            permissionGroupId,
+            createBy: user.id,
+          })),
+        });
+      }
+
+      return { ...data, password };
+    });
   }
 
-  async updateUser(userId: number, body: CoreUpdateUserDto) {
+  async updateUser(
+    userId: number,
+    { permissionGroupIds, ...body }: CoreUpdateUserDto,
+  ) {
     const existingUser = await this.prismaService.user.findFirst({
       where: {
         id: userId,
@@ -127,7 +209,7 @@ export class UserService {
       name: body.name,
       isBan: body.isBan,
     };
-    let newPassword;
+    let newPassword: string;
 
     if (body.email) {
       const existingUserEmail = await this.prismaService.user.findFirst({
@@ -156,13 +238,47 @@ export class UserService {
       Object.assign(data, { password: hashedPassword });
     }
 
-    const user = await this.prismaService.user.update({
-      where: {
-        id: userId,
-      },
-      data,
-    });
+    return this.prismaService.$transaction(async (prisma) => {
+      const user = await this.prismaService.user.update({
+        where: {
+          id: userId,
+        },
+        data,
+      });
 
-    return { ...user, password: newPassword };
+      if (permissionGroupIds?.length) {
+        const permissionGroups = await prisma.permissionGroup.count({
+          where: {
+            id: {
+              in: permissionGroupIds,
+            },
+          },
+        });
+
+        if (permissionGroups !== permissionGroupIds.length) {
+          throw new ApiException(
+            'Permission group not found',
+            HttpStatus.BAD_REQUEST,
+            ErrorCode.INVALID_INPUT,
+          );
+        }
+
+        await prisma.userPermissionGroup.deleteMany({
+          where: {
+            userId,
+          },
+        });
+
+        await prisma.userPermissionGroup.createMany({
+          data: permissionGroupIds.map((permissionGroupId) => ({
+            userId,
+            permissionGroupId,
+            createBy: user.id,
+          })),
+        });
+      }
+
+      return { ...user, password: newPassword };
+    });
   }
 }

@@ -1,6 +1,11 @@
+import { User } from '@prisma/client';
+import { KeyPermissionDefaultType } from 'libs/modules/init-data/init';
 import { DateTime } from 'luxon';
 import { ClsServiceManager } from 'nestjs-cls';
 
+export interface AuthUser extends User {
+  permission?: KeyPermissionDefaultType[];
+}
 export class ContextProvider {
   private static readonly nameSpace = 'request';
 
@@ -27,7 +32,7 @@ export class ContextProvider {
     return `${ContextProvider.nameSpace}.${key}`;
   }
 
-  static setAuthUser(user: unknown): void {
+  static setAuthUser(user: AuthUser): void {
     ContextProvider.set(ContextProvider.authUserKey, user);
   }
 
