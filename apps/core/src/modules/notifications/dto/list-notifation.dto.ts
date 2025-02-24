@@ -7,6 +7,8 @@ export class ListNotificationDto extends BaseQueryDto {
   @ApiProperty({
     description: 'how, hide notification',
     example: 'SHOW',
+    enum: NotificationStatus,
+    enumName: 'NotificationStatus',
   })
   @IsOptional()
   @IsEnum(NotificationStatus)

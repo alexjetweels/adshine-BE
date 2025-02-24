@@ -20,16 +20,17 @@ enum Role {
 }
 
 model User {
-  id        BigInt   @id @default(autoincrement())
-  name      String   @db.VarChar(255)
-  email     String   @db.VarChar(255)
-  photoUrl  String?  @db.VarChar(255)
-  password  String   @db.VarChar(255) // Mã hash của mật khẩu
-  isBan     Boolean  @default(false)
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Order     Order[]
+  id                  BigInt                @id @default(autoincrement())
+  name                String                @db.VarChar(255)
+  email               String                @db.VarChar(255)
+  photoUrl            String?               @db.VarChar(255)
+  password            String                @db.VarChar(255) // Mã hash của mật khẩu
+  isBan               Boolean               @default(false)
+  role                Role                  @default(USER)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  Order               Order[]
+  UserPermissionGroup UserPermissionGroup[]
 
   @@index([email])
   @@map("users")
@@ -139,7 +140,7 @@ enum NotificationStatus {
 
 model Notification {
   id        String             @id @default(uuid())
-  title     String?             @db.VarChar(255)
+  title     String?            @db.VarChar(255)
   content   String             @db.Text
   type      NotificationType   @default(ALL_USER)
   status    NotificationStatus @default(SHOW)
@@ -150,4 +151,60 @@ model Notification {
   updatedAt DateTime           @updatedAt
 
   @@map("notifications")
+}
+
+model Permission {
+  id          String   @id
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  groupDetails PermissionGroupDetail[]
+
+  @@map("permissions")
+}
+
+enum StatusPermissionGroup {
+  ACTIVE
+  INACTIVE
+}
+
+model PermissionGroup {
+  id        String                @id @default(uuid())
+  name      String                @db.VarChar(255)
+  createBy  BigInt                @db.BigInt
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  status    StatusPermissionGroup @default(ACTIVE)
+  description String?     @db.Text
+
+  permissions PermissionGroupDetail[]
+  userGroups  UserPermissionGroup[]
+
+  @@map("permission_groups")
+}
+
+model PermissionGroupDetail {
+  permissionGroupId String
+  permissionId      String
+
+  permissionGroup PermissionGroup @relation(fields: [permissionGroupId], references: [id], onDelete: Cascade)
+  permission      Permission      @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([permissionGroupId, permissionId])
+  @@map("permission_group_details")
+}
+
+model UserPermissionGroup {
+  userId            BigInt
+  permissionGroupId String
+  createBy          BigInt   @db.BigInt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permissionGroup PermissionGroup @relation(fields: [permissionGroupId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permissionGroupId])
+  @@map("user_permission_groups")
 }

@@ -8,6 +8,8 @@ export class UpdateOrderDto extends PartialType(CreateOrderDto) {
     description: 'remove order',
     example: 'INACTIVE',
     required: false,
+    enum: StatusOrder,
+    enumName: 'StatusOrder',
   })
   @IsOptional()
   @IsEnum(StatusOrder)

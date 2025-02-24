@@ -24,8 +24,10 @@ export class CreateNotificationDto {
   //status
   @ApiProperty({
     description: 'The status',
-    example: 'Example Status',
+    example: NotificationStatus.HIDE,
     required: false,
+    enum: NotificationStatus,
+    enumName: 'NotificationStatus',
   })
   @IsOptional()
   @IsEnum(NotificationStatus)

@@ -8,6 +8,8 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {
     description: 'inactive product',
     example: 'INACTIVE',
     required: false,
+    enum: StatusProduct,
+    enumName: 'StatusProduct',
   })
   @IsOptional()
   @IsEnum(StatusProduct)

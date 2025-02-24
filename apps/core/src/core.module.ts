@@ -15,6 +15,8 @@ import { InitDataModule } from 'libs/modules/init-data/init-data.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { PermissionsModule } from './modules/permissions/permissions.module';
+import { PermissionGroupsModule } from './modules/permission-groups/permission-groups.module';
 
 const applications = [HealthModule, AuthModule, UserModule];
 
@@ -45,6 +47,8 @@ const applications = [HealthModule, AuthModule, UserModule];
     ProductsModule,
     OrdersModule,
     NotificationsModule,
+    PermissionsModule,
+    PermissionGroupsModule,
   ],
 })
 export class CoreModule {
