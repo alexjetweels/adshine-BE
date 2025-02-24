@@ -5,9 +5,10 @@ import {
   HttpStatus,
   Param,
   Post,
-  Query
+  Query,
 } from '@nestjs/common';
-import { Auth } from 'libs/utils';
+import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
+import { AuthV2 } from 'libs/utils';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
 import { RoleType } from 'libs/utils/enum';
@@ -30,7 +31,7 @@ import { UserService } from './user.service';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Auth()
+  @AuthV2()
   @Get('me')
   @ApiResponseCustom([responseMeSuccess])
   @HttpCode(HttpStatus.OK)
@@ -38,7 +39,7 @@ export class UserController {
     return this.userService.getUserInfo();
   }
 
-  @Auth([RoleType.ADMIN])
+  @AuthV2([PERMISSION_KEYS.USER_VIEW])
   @Get()
   @ApiResponseCustom([responseGetListUserSuccess])
   @HttpCode(HttpStatus.OK)
@@ -46,7 +47,7 @@ export class UserController {
     return this.userService.getListUser(query);
   }
 
-  @Auth([RoleType.ADMIN])
+  @AuthV2([PERMISSION_KEYS.USER_CREATE])
   @Post()
   @ApiResponseCustom([responseCreateUserSuccess])
   @HttpCode(HttpStatus.CREATED)
@@ -54,7 +55,7 @@ export class UserController {
     return this.userService.createUser(body);
   }
 
-  @Auth([RoleType.ADMIN])
+  @AuthV2([PERMISSION_KEYS.USER_UPDATE])
   @Post(':userId')
   @ApiResponseCustom([responseUpdateUserSuccess])
   @HttpCode(HttpStatus.OK)
@@ -65,4 +66,11 @@ export class UserController {
     return this.userService.updateUser(userId, body);
   }
 
+  @AuthV2([PERMISSION_KEYS.USER_VIEW])
+  @Get(':userId')
+  @ApiResponseCustom([responseUpdateUserSuccess])
+  @HttpCode(HttpStatus.OK)
+  async findOne(@Param('userId') userId: number) {
+    return this.userService.findOne(userId);
+  }
 }

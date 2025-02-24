@@ -70,7 +70,7 @@ export class TokenService {
       const user = await this.prismaService.user.findFirst({
         where: { id: decoded.userId },
       });
-
+  
       if (!user) {
         throw new ApiException('Unauthorize', HttpStatus.UNAUTHORIZED);
       }

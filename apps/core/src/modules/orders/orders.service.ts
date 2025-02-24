@@ -3,12 +3,16 @@ import { Prisma, Role, StatusOrder, User } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ErrorCode } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
-import { ContextProvider } from 'libs/utils/providers/context.provider';
+import {
+  AuthUser,
+  ContextProvider,
+} from 'libs/utils/providers/context.provider';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { ListOrderDto } from './dto/list-order.dto';
 import { schemaPaging } from 'libs/utils/util';
 import { map } from 'lodash';
+import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 
 @Injectable()
 export class OrdersService {
@@ -138,6 +142,7 @@ export class OrdersService {
   }
 
   async update(id: number, body: UpdateOrderDto) {
+    const user = ContextProvider.getAuthUser<AuthUser>();
     const orderCurrent = await this.findOne(id);
 
     if (!orderCurrent) {
@@ -145,6 +150,17 @@ export class OrdersService {
         'Order not found',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    if (
+      orderCurrent.userId !== user.id ||
+      !user?.permission?.includes(PERMISSION_KEYS.ORDER_UPDATE)
+    ) {
+      throw new ApiException(
+        'Forbidden resource',
+        HttpStatus.FORBIDDEN,
+        ErrorCode.FORBIDDEN,
       );
     }
 

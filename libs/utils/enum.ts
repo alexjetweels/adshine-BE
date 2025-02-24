@@ -1,4 +1,9 @@
-export const ValuesImportant = ['password', 'refreshToken', 'oldPassword', 'newPassword'];
+export const ValuesImportant = [
+  'password',
+  'refreshToken',
+  'oldPassword',
+  'newPassword',
+];
 
 export enum RoleType {
   USER = 'USER',
@@ -14,6 +19,7 @@ export enum ErrorCode {
   INVALID_INPUT = 'ERR100',
   UNAUTHORIZED_TELEGRAM = 'ERR101',
   NOT_FOUND = 'ERR102',
+  FORBIDDEN = 'ERR102',
 }
 
 export const COEFFICIENT = 1;

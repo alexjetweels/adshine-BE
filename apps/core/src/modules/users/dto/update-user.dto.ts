@@ -1,12 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
   IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
 } from 'class-validator';
+import { UUID } from 'crypto';
 
 export class CoreUpdateUserDto {
   @ApiProperty({
@@ -45,4 +48,18 @@ export class CoreUpdateUserDto {
   @IsOptional()
   @IsBoolean()
   isBan?: boolean;
+
+  @ApiProperty({
+    description: 'Permission group ids, should be an array of string',
+    example: [
+      'e83e4a7c-4a61-458b-911d-f5f247e40865',
+      'e83e4a7c-4a61-458b-911d-f5f247e40865',
+    ],
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  permissionGroupIds: UUID[];
 }

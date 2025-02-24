@@ -14,20 +14,37 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { Roles } from './role.decorator';
-import { AuthUserInterceptor } from '../interceptors';
+import { KeyPermissionDefaultType } from 'libs/modules/init-data/init';
 import { RoleType } from '../enum';
 import { AuthGuard, RolesGuard } from '../guards';
+import { AuthUserInterceptor } from '../interceptors';
+import { Permissions } from './permission.decorator';
+import { Roles } from './role.decorator';
+import { PermissionsGuard } from '../guards/permission.guard';
 
 export function Auth(
   roles: RoleType[] = [],
   options?: Partial<{ public: boolean }>,
 ): MethodDecorator {
   const isPublicRoute = options?.public;
-
   return applyDecorators(
     Roles(roles),
     UseGuards(AuthGuard({ public: isPublicRoute }), RolesGuard),
+    ApiBearerAuth(),
+    UseInterceptors(AuthUserInterceptor),
+    ApiUnauthorizedResponse({ description: 'Unauthorized' }),
+  );
+}
+
+export function AuthV2(
+  permissions: KeyPermissionDefaultType[] = [],
+  options?: Partial<{ public: boolean }>,
+): MethodDecorator {
+  const isPublicRoute = options?.public;
+
+  return applyDecorators(
+    Permissions(permissions),
+    UseGuards(AuthGuard({ public: isPublicRoute }), PermissionsGuard),
     ApiBearerAuth(),
     UseInterceptors(AuthUserInterceptor),
     ApiUnauthorizedResponse({ description: 'Unauthorized' }),

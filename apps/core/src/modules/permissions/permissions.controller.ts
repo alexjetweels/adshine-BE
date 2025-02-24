@@ -1,9 +1,9 @@
-import { Controller, Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
-import { PermissionsService } from './permissions.service';
-import { Auth } from 'libs/utils';
-import { ListPermissionDto } from './dto/list-permission.dto';
+import { Get, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { AuthV2 } from 'libs/utils';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
+import { ListPermissionDto } from './dto/list-permission.dto';
+import { PermissionsService } from './permissions.service';
 import { responseListPermissionSuccess } from './response/schema';
 
 @CoreControllers({
@@ -14,7 +14,7 @@ import { responseListPermissionSuccess } from './response/schema';
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}
 
-  @Auth()
+  @AuthV2()
   @Get()
   @ApiResponseCustom([responseListPermissionSuccess])
   @HttpCode(HttpStatus.OK)
