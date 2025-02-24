@@ -7,6 +7,8 @@ export class ListProductDto extends BaseQueryDto {
   @ApiProperty({
     description: 'inactive product',
     example: true,
+    enum: StatusProduct,
+    enumName: 'StatusProduct',
   })
   @IsOptional()
   @IsEnum(StatusProduct)

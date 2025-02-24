@@ -18,6 +18,6 @@ export class CustomValidateIsPassword implements ValidatorConstraintInterface {
   }
 
   defaultMessage(args: ValidationArguments) {
-    return `${args.property} minimum of eight characters, at least one uppercase letter, one lowercase letter, and one number`;
+    return `${args.property} minimum of six characters, at least one uppercase letter, one lowercase letter, one number, and one special character`;
   }
 }

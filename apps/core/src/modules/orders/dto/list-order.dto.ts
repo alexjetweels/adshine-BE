@@ -7,6 +7,8 @@ export class ListOrderDto extends BaseQueryDto {
   @ApiProperty({
     description: 'inactive order',
     example: 'ACTIVE',
+    enum: StatusOrder,
+    enumName: 'StatusOrder',
   })
   @IsOptional()
   @IsEnum(StatusOrder)
