@@ -1,12 +1,13 @@
 import {
   type CanActivate,
   type ExecutionContext,
+  ForbiddenException,
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { KeyPermissionDefaultType } from 'libs/modules/init-data/init';
 import { isEmpty } from 'lodash';
 import { RoleType } from '../enum';
-import { KeyPermissionDefaultType } from 'libs/modules/init-data/init';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -34,6 +35,12 @@ export class PermissionsGuard implements CanActivate {
       userPermissions.includes(permission),
     );
 
-    return checkPermissions;
+    if (!checkPermissions) {
+      throw new ForbiddenException(
+        `Bạn không có quyền thực hiện hành động này. Cần quyền: ${permissions.join(', ')}`,
+      );
+    }
+
+    return true;
   }
 }
