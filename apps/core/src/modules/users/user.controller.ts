@@ -11,7 +11,6 @@ import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 import { AuthV2 } from 'libs/utils';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
-import { RoleType } from 'libs/utils/enum';
 import { CoreCreateUserDto } from './dto/create-user.dto';
 import { ListUserDto } from './dto/list-user.dto';
 import { CoreUpdateUserDto } from './dto/update-user.dto';
