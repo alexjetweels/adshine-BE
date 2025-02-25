@@ -1,12 +1,25 @@
-import { P } from 'pino';
-
 // Permission default
 export const PERMISSION_DEFAULT = {
+  GROUP_CREATE: {
+    description: 'Tạo nhóm mới',
+  },
+  GROUP_VIEW: {
+    description:
+      'Xem thông tin nhóm, người có quyền này đc xem tất cả các nhóm hoặc trường hợp người trong nhóm chỉ xem được nhóm của mình!',
+  },
+  GROUP_UPDATE: {
+    description:
+      'Chỉnh sửa thông tin nhóm, MANAGER cũng có thể chỉnh sửa nhóm (bao gồm thêm người với role thấp hơn mình vào nhóm)',
+  },
+  GROUP_DELETE: {
+    description: 'Xóa nhóm',
+  },
   USER_CREATE: {
-    description: 'Tạo người dùng mới',
+    description: 'Tạo người dùng mới, thêm quyền cho người dùng',
   },
   USER_UPDATE: {
-    description: 'Chỉnh sửa thông tin người dùng',
+    description:
+      'Chỉnh sửa thông tin người dùng, bao gồm chỉnh sửa thông tin cơ bản, xóa người dùng, update quyền cho người dùng',
   },
   USER_VIEW: {
     description: 'Xem thông tin người dùng',
@@ -39,7 +52,8 @@ export const PERMISSION_DEFAULT = {
     description: 'Tạo đơn hàng mới',
   },
   ORDER_UPDATE: {
-    description: 'Chỉnh sửa thông tin đơn hàng',
+    description:
+      'Chỉnh sửa thông tin đơn hàng, xóa đơn hàng, đối với người tạo đơn hàng sẽ được xóa đơn hàng trong 1 số trường hợp nhất định',
   },
 };
 

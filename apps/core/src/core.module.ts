@@ -17,6 +17,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { PermissionsModule } from './modules/permissions/permissions.module';
 import { PermissionGroupsModule } from './modules/permission-groups/permission-groups.module';
+import { GroupsModule } from './modules/groups/groups.module';
 
 const applications = [HealthModule, AuthModule, UserModule];
 
@@ -49,6 +50,7 @@ const applications = [HealthModule, AuthModule, UserModule];
     NotificationsModule,
     PermissionsModule,
     PermissionGroupsModule,
+    GroupsModule,
   ],
 })
 export class CoreModule {

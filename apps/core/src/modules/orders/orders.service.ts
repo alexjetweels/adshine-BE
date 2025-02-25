@@ -155,10 +155,10 @@ export class OrdersService {
 
     if (
       orderCurrent.userId !== user.id ||
-      !user?.permission?.includes(PERMISSION_KEYS.ORDER_UPDATE)
+      !user?.permissions?.includes(PERMISSION_KEYS.ORDER_UPDATE)
     ) {
       throw new ApiException(
-        'Forbidden resource',
+        'User not permission ORDER_UPDATE or not owner order',
         HttpStatus.FORBIDDEN,
         ErrorCode.FORBIDDEN,
       );

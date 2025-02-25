@@ -4,7 +4,7 @@ import { DateTime } from 'luxon';
 import { ClsServiceManager } from 'nestjs-cls';
 
 export interface AuthUser extends User {
-  permission?: KeyPermissionDefaultType[];
+  permissions?: KeyPermissionDefaultType[];
 }
 export class ContextProvider {
   private static readonly nameSpace = 'request';
