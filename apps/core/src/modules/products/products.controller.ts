@@ -6,7 +6,7 @@ import {
   Param,
   Patch,
   Post,
-  Query
+  Query,
 } from '@nestjs/common';
 import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 import { AuthV2 } from 'libs/utils';
@@ -17,11 +17,15 @@ import { ListProductDto } from './dto/list-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductsService } from './products.service';
 import {
+  responseCreateProductCategorySuccess,
   responseCreateProductSuccess,
   responseDetailProductSuccess,
+  responseListProductCategorySuccess,
   responseListProductSuccess,
   responseUpdateProductSuccess,
 } from './response/schema';
+import { CreateProductCategoriesDto } from './dto/create-product-categories.dto copy';
+import { ListProductCategoriesDto } from './dto/list-product-categories.dto';
 
 @CoreControllers({
   path: 'products',
@@ -30,6 +34,22 @@ import {
 })
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
+
+  @AuthV2([PERMISSION_KEYS.PRODUCT_CREATE])
+  @Post('categories')
+  @ApiResponseCustom([responseCreateProductCategorySuccess])
+  @HttpCode(HttpStatus.CREATED)
+  createCategories(@Body() body: CreateProductCategoriesDto) {
+    return this.productsService.createCategories(body);
+  }
+
+  @AuthV2()
+  @Get('categories')
+  @ApiResponseCustom([responseListProductCategorySuccess])
+  @HttpCode(HttpStatus.OK)
+  findAllCategories(@Body() body: ListProductCategoriesDto) {
+    return this.productsService.findAllCategories(body);
+  }
 
   @AuthV2([PERMISSION_KEYS.PRODUCT_CREATE])
   @Post()

@@ -81,18 +81,34 @@ enum StatusProduct {
   ACTIVE
 }
 
+model ProductCategory {
+  id          BigInt        @id @default(autoincrement())
+  name        String        @db.VarChar(255)
+  description String?       @db.Text
+  status      StatusProduct @default(ACTIVE)
+  createBy    BigInt        @db.BigInt
+  products    Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("product_categories")
+}
+
 model Product {
   id          BigInt        @id @default(autoincrement())
-  category    String        @unique @db.VarChar(255)
-  name        String?       @db.VarChar(255)
+  categoryId  BigInt
+  name        String        @db.VarChar(255)
   description String?       @db.Text
   price       BigInt?       @default(0)
   stock       BigInt?       @default(0)
   status      StatusProduct @default(ACTIVE)
+  createBy    BigInt        @db.BigInt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  OrderItem   OrderItem[]
 
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  OrderItem OrderItem[]
+  category ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@map("products")
 }
