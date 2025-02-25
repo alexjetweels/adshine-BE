@@ -22,10 +22,12 @@ import {
   responseDetailProductSuccess,
   responseListProductCategorySuccess,
   responseListProductSuccess,
+  responseUpdateProductCategorySuccess,
   responseUpdateProductSuccess,
 } from './response/schema';
 import { CreateProductCategoriesDto } from './dto/create-product-categories.dto copy';
 import { ListProductCategoriesDto } from './dto/list-product-categories.dto';
+import { UpdateProductCategoriesDto } from './dto/update-product-categoies.dto';
 
 @CoreControllers({
   path: 'products',
@@ -51,12 +53,23 @@ export class ProductsController {
     return this.productsService.findAllCategories(body);
   }
 
+  @AuthV2([PERMISSION_KEYS.PRODUCT_UPDATE])
+  @Patch('categories/:id')
+  @ApiResponseCustom([responseUpdateProductCategorySuccess])
+  @HttpCode(HttpStatus.OK)
+  updateCategory(
+    @Param('id') id: number,
+    @Body() body: UpdateProductCategoriesDto,
+  ) {
+    return this.productsService.updateCategory(id, body);
+  }
+
   @AuthV2([PERMISSION_KEYS.PRODUCT_CREATE])
   @Post()
   @ApiResponseCustom([responseCreateProductSuccess])
   @HttpCode(HttpStatus.CREATED)
   create(@Body() body: CreateProductDto) {
-    return this.productsService.create(body);
+    return this.productsService.createProduct(body);
   }
 
   @AuthV2()
@@ -72,7 +85,7 @@ export class ProductsController {
   @ApiResponseCustom([responseDetailProductSuccess])
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: number) {
-    return this.productsService.findOne(id);
+    return this.productsService.findOneProduct(id);
   }
 
   @AuthV2([PERMISSION_KEYS.PRODUCT_UPDATE])
@@ -80,6 +93,6 @@ export class ProductsController {
   @ApiResponseCustom([responseUpdateProductSuccess])
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: number, @Body() body: UpdateProductDto) {
-    return this.productsService.update(id, body);
+    return this.productsService.updateProduct(id, body);
   }
 }

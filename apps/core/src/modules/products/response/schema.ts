@@ -74,6 +74,21 @@ export const responseListProductCategorySuccess: ApiResponseOptions = {
   },
 };
 
+export const responseUpdateProductCategorySuccess: ApiResponseOptions = {
+  status: HttpStatus.CREATED,
+  description: 'Response example',
+  schema: {
+    example: {
+      data: {
+        name: 'FACEBOOK',
+      },
+      timestamp: '25/02/2025 17:23:15',
+      path: '/api/core/v1/products/categories/1',
+      traceId: '93b88772-19ac-47e3-99e3-5cd4d0e9ad63',
+    },
+  },
+};
+
 export const responseListProductSuccess: ApiResponseOptions = {
   status: HttpStatus.CREATED,
   description: 'Response example',

@@ -14,18 +14,26 @@ import {
 } from 'libs/utils/providers/context.provider';
 import { CreateProductCategoriesDto } from './dto/create-product-categories.dto copy';
 import { ListProductCategoriesDto } from './dto/list-product-categories.dto';
+import { UpdateProductCategoriesDto } from './dto/update-product-categoies.dto';
 
 @Injectable()
 export class ProductsService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findByName(name: string, idExclude?: number) {
+  async findProductByName(
+    name: string,
+    options?: { status?: StatusProduct; idExclude?: number },
+  ) {
     const where = { name } as Prisma.ProductWhereInput;
 
-    if (idExclude) {
+    if (options?.idExclude) {
       where.id = {
-        not: idExclude,
+        not: options?.idExclude,
       };
+    }
+
+    if (options?.status) {
+      where.status = options?.status;
     }
 
     return await this.prismaService.product.findFirst({
@@ -39,15 +47,33 @@ export class ProductsService {
     });
   }
 
-  async findProductCategoryByName(name: string) {
-    return this.prismaService.productCategory.findFirst({
-      where: { name, status: StatusProduct.ACTIVE },
+  async findProductCategoryByName(
+    name: string,
+    options?: { status?: StatusProduct; idExclude?: number },
+  ) {
+    const where = { name } as Prisma.ProductCategoryWhereInput;
+
+    if (options?.idExclude) {
+      where.id = {
+        not: options?.idExclude,
+      };
+    }
+
+    if (options?.status) {
+      where.status = options?.status;
+    }
+
+    return await this.prismaService.productCategory.findFirst({
+      where,
     });
   }
 
   async createCategories(body: CreateProductCategoriesDto) {
     const user = ContextProvider.getAuthUser<AuthUser>();
-    const nameCategoryIsExist = await this.findProductCategoryByName(body.name);
+    const nameCategoryIsExist = await this.findProductCategoryByName(
+      body.name,
+      { status: StatusProduct.ACTIVE },
+    );
     if (nameCategoryIsExist) {
       throw new ApiException(
         'Category name already exists',
@@ -104,7 +130,7 @@ export class ProductsService {
     });
   }
 
-  async create(body: CreateProductDto) {
+  async createProduct(body: CreateProductDto) {
     const user = ContextProvider.getAuthUser<AuthUser>();
     const isExist = await this.checkProductCategoryExist(body.categoryId);
 
@@ -116,7 +142,9 @@ export class ProductsService {
       );
     }
 
-    const nameProductIsExist = await this.findByName(body.name);
+    const nameProductIsExist = await this.findProductByName(body.name, {
+      status: StatusProduct.ACTIVE,
+    });
     if (nameProductIsExist) {
       throw new ApiException(
         'Product name already exists',
@@ -177,12 +205,61 @@ export class ProductsService {
     });
   }
 
-  findOne(id: number) {
-    return this.prismaService.product.findUnique({ where: { id } });
+  async findOneProduct(id: number) {
+    return await this.prismaService.product.findUnique({ where: { id } });
   }
 
-  async update(id: number, body: UpdateProductDto) {
-    const product = await this.findOne(id);
+  async findOneProductCategory(id: number) {
+    return await this.prismaService.productCategory.findUnique({
+      where: { id },
+    });
+  }
+
+  async updateCategory(id: number, body: UpdateProductCategoriesDto) {
+    const productCategory = await this.findOneProductCategory(id);
+
+    if (!productCategory) {
+      throw new ApiException(
+        'Product category not found',
+        HttpStatus.NOT_FOUND,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    if (body.name || body.status) {
+      const condition = { idExclude: id } as {
+        idExclude?: number;
+        status?: StatusProduct;
+      };
+      if (
+        body.status === StatusProduct.ACTIVE &&
+        productCategory.status === StatusProduct.INACTIVE
+      ) {
+        condition.status = body.status;
+      }
+      const nameCategoryIsExist = await this.findProductCategoryByName(
+        body.name || productCategory.name,
+        condition,
+      );
+      if (nameCategoryIsExist) {
+        throw new ApiException(
+          'Category name already exists',
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
+    }
+
+    await this.prismaService.productCategory.update({
+      where: { id },
+      data: body as Prisma.ProductUpdateInput,
+    });
+
+    return body;
+  }
+
+  async updateProduct(id: number, body: UpdateProductDto) {
+    const product = await this.findOneProduct(id);
 
     if (!product) {
       throw new ApiException(
@@ -190,6 +267,30 @@ export class ProductsService {
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
+    }
+
+    if (body.name || body.status) {
+      const condition = { idExclude: id } as {
+        idExclude?: number;
+        status?: StatusProduct;
+      };
+      if (
+        body.status === StatusProduct.ACTIVE &&
+        product.status === StatusProduct.INACTIVE
+      ) {
+        condition.status = body.status;
+      }
+      const nameProductIsExist = await this.findProductByName(
+        body.name || product.name,
+        condition,
+      );
+      if (nameProductIsExist) {
+        throw new ApiException(
+          'Product name already exists',
+          HttpStatus.BAD_REQUEST,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
     }
 
     await this.prismaService.product.update({
