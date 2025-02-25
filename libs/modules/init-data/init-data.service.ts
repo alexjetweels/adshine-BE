@@ -44,15 +44,44 @@ export class InitDataService {
       keyof PermissionDefaultType
     >;
 
-    const newPermissions = permissionDefault.filter(
-      (p) => !existingPermissions.includes(p),
+    const { newPermissions, oldPermissions } = permissionDefault.reduce(
+      (acc, p) => {
+        if (existingPermissions.includes(p)) {
+          acc.oldPermissions.push(p);
+        } else {
+          acc.newPermissions.push(p);
+        }
+        return acc;
+      },
+      {
+        newPermissions: [] as Array<keyof PermissionDefaultType>,
+        oldPermissions: [] as Array<keyof PermissionDefaultType>,
+      },
     );
+    // const newPermissions = permissionDefault.filter(
+    //   (p) => !existingPermissions.includes(p),
+    // );
 
-    await this.prismaService.permission.createMany({
-      data: newPermissions.map((p) => ({
-        id: p,
-        description: PERMISSION_DEFAULT[p].description,
-      })),
-    });
+    if (newPermissions.length) {
+      await this.prismaService.permission.createMany({
+        data: newPermissions.map((p) => ({
+          id: p,
+          description: PERMISSION_DEFAULT[p].description,
+        })),
+      });
+    }
+
+    if (oldPermissions.length) {
+      await Promise.all(
+        oldPermissions.map((p) =>
+          this.prismaService.permission.update({
+            where: { id: p },
+            data: {
+              description: PERMISSION_DEFAULT[p].description,
+            },
+          }),
+        ),
+      );
+    }
   }
 }

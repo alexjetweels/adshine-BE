@@ -31,6 +31,7 @@ model User {
   updatedAt           DateTime              @updatedAt
   Order               Order[]
   UserPermissionGroup UserPermissionGroup[]
+  UserGroup           UserGroup[]
 
   @@index([email])
   @@map("users")
@@ -170,13 +171,13 @@ enum StatusPermissionGroup {
 }
 
 model PermissionGroup {
-  id        String                @id @default(uuid())
-  name      String                @db.VarChar(255)
-  createBy  BigInt                @db.BigInt
-  createdAt DateTime              @default(now())
-  updatedAt DateTime              @updatedAt
-  status    StatusPermissionGroup @default(ACTIVE)
-  description String?     @db.Text
+  id          String                @id @default(uuid())
+  name        String                @db.VarChar(255)
+  createBy    BigInt                @db.BigInt
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  status      StatusPermissionGroup @default(ACTIVE)
+  description String?               @db.Text
 
   permissions PermissionGroupDetail[]
   userGroups  UserPermissionGroup[]
@@ -207,4 +208,48 @@ model UserPermissionGroup {
 
   @@id([userId, permissionGroupId])
   @@map("user_permission_groups")
+}
+
+enum GroupRole {
+  MANAGER
+  LEADER
+  STAFF
+}
+
+enum StatusGroup {
+  ACTIVE
+  INACTIVE
+}
+
+model Group {
+  id          String      @id @default(uuid())
+  name        String      @db.VarChar(255)
+  description String?     @db.Text
+  status      StatusGroup @default(ACTIVE)
+  createBy    BigInt      @db.BigInt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  users UserGroup[]
+
+  @@map("groups")
+}
+
+enum StatusUserGroup {
+  ACTIVE
+  INACTIVE
+}
+
+model UserGroup {
+  userId   BigInt
+  groupId  String
+  status   StatusUserGroup @default(ACTIVE)
+  role     GroupRole       @default(STAFF)
+  createBy BigInt          @db.BigInt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([userId, groupId])
+  @@map("user_groups")
 }

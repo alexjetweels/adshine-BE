@@ -31,6 +31,18 @@ export class PermissionsService {
       },
     });
 
-    return records;
+    const groupedPermissions = records.reduce(
+      (acc, item) => {
+        const [prefix] = item.id.split('_');
+        if (!acc[prefix]) {
+          acc[prefix] = [];
+        }
+        acc[prefix].push(item);
+        return acc;
+      },
+      {} as Record<string, typeof records>,
+    );
+
+    return groupedPermissions;
   }
 }
