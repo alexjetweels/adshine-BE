@@ -24,6 +24,56 @@ export const responseCreateProductSuccess: ApiResponseOptions = {
   },
 };
 
+export const responseCreateProductCategorySuccess: ApiResponseOptions = {
+  status: HttpStatus.CREATED,
+  description: 'Response example',
+  schema: {
+    example: {
+      data: {
+        id: 1,
+        name: 'FACEBOOK',
+        description: null,
+        status: 'ACTIVE',
+        createBy: 23,
+        createdAt: '2025-02-25T09:24:30.772Z',
+        updatedAt: '2025-02-25T09:24:30.772Z',
+      },
+      timestamp: '25/02/2025 16:24:30',
+      path: '/api/core/v1/products/categories',
+      traceId: 'db0e6e94-670c-488c-94c2-3d9f8818d8a2',
+    },
+  },
+};
+
+export const responseListProductCategorySuccess: ApiResponseOptions = {
+  status: HttpStatus.CREATED,
+  description: 'Response example',
+  schema: {
+    example: {
+      data: {
+        page: 1,
+        limit: 20,
+        data: [
+          {
+            id: 1,
+            name: 'FACEBOOK',
+            description: null,
+            status: 'ACTIVE',
+            createBy: 23,
+            createdAt: '2025-02-25T09:24:30.772Z',
+            updatedAt: '2025-02-25T09:24:30.772Z',
+          },
+        ],
+        totalPage: 1,
+        totalItems: 1,
+      },
+      timestamp: '25/02/2025 16:31:38',
+      path: '/api/core/v1/products/categories',
+      traceId: '0b0d1d7b-e720-43e1-97e1-c70e53633f8d',
+    },
+  },
+};
+
 export const responseListProductSuccess: ApiResponseOptions = {
   status: HttpStatus.CREATED,
   description: 'Response example',

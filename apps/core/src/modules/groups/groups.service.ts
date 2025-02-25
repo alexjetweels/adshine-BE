@@ -30,7 +30,7 @@ export class GroupsService {
   }
 
   async create({ managerIds, ...createGroupDto }: CreateGroupDto) {
-    const user = ContextProvider.getAuthUser<User>();
+    const user = ContextProvider.getAuthUser<AuthUser>();
 
     const countUsers = await this.checkUserInDatabase(managerIds);
 
@@ -181,7 +181,7 @@ export class GroupsService {
         },
       },
     });
-    
+
     return group;
   }
 

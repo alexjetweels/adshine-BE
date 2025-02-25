@@ -87,6 +87,6 @@ yarn start:core:dev
 
 
 ## build with docker
-docker build -f ./apps/core/Dockerfile -t be-app .
+docker build -f ./apps/core/Dockerfile -t be-adshine .
 docker-compose down
 docker-compose up -d

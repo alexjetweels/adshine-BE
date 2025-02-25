@@ -5,28 +5,30 @@ import {
   MaxLength,
   IsOptional,
   IsInt,
+  Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProductDto {
   @ApiProperty({
-    description: 'The category of the product, unique to the product',
-    example: 'Electronics',
+    description: 'Category ID of the product',
+    example: 1,
+    required: true,
   })
   @IsNotEmpty()
-  @IsString()
-  @MaxLength(255)
-  category: string;
+  @IsInt()
+  @Min(1)
+  categoryId: number;
 
   @ApiProperty({
     description: 'The name of the product',
     example: 'Example Product',
-    required: false,
+    required: true,
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @MaxLength(255)
-  name?: string;
+  name: string;
 
   @ApiProperty({
     description: 'The description of the product',
