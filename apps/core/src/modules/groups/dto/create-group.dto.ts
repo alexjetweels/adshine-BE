@@ -3,13 +3,17 @@ import { Transform } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  IsEnum,
   IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   Min,
+  ValidateIf,
 } from 'class-validator';
+import { GroupType } from '@prisma/client';
 
 export class CreateGroupDto {
   @ApiProperty({
@@ -36,6 +40,39 @@ export class CreateGroupDto {
     return Array.from(new Set(value)).map((v: any): number => v as number);
   })
   managerIds: number[];
+
+  @ApiProperty({
+    description: 'Group type',
+    example: GroupType.ORDER,
+    required: false,
+    enum: GroupType,
+    enumName: 'GroupType',
+  })
+  @IsNotEmpty()
+  @IsEnum(GroupType)
+  type: GroupType;
+
+  @ApiProperty({
+    description: 'List manager user id',
+    example: ['46097793-3017-4a8f-bfa1-069e29dbd870'],
+    required: true,
+    type: [String],
+  })
+  @ValidateIf((cgd: CreateGroupDto) => {
+    if (cgd.type !== GroupType.SUPPORT) {
+      delete cgd.groupIdsSupport;
+    }
+
+    return true;
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @Transform(({ value }: { value: string[] }): string[] => {
+    return Array.from(new Set(value)).map((v: any): string => v as string);
+  })
+  @IsUUID('4', { each: true })
+  groupIdsSupport?: string[];
 
   @ApiProperty({
     description: 'The description of the group',

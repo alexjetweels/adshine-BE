@@ -237,18 +237,35 @@ enum StatusGroup {
   INACTIVE
 }
 
+enum GroupType {
+  ORDER
+  SUPPORT
+}
+
 model Group {
   id          String      @id @default(uuid())
   name        String      @db.VarChar(255)
   description String?     @db.Text
   status      StatusGroup @default(ACTIVE)
+  type        GroupType   @default(ORDER)
   createBy    BigInt      @db.BigInt
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  users UserGroup[]
+  users             UserGroup[]
+  SupportOrderGroup SupportOrderGroup[]
 
   @@map("groups")
+}
+
+model SupportOrderGroup {
+  supportGroupId String
+  orderGroupId   BigInt
+
+  supportGroup Group @relation(fields: [supportGroupId], references: [id], onDelete: Cascade)
+
+  @@id([supportGroupId, orderGroupId])
+  @@map("support_order_groups")
 }
 
 enum StatusUserGroup {
@@ -257,15 +274,27 @@ enum StatusUserGroup {
 }
 
 model UserGroup {
+  id       String          @default(uuid())
   userId   BigInt
   groupId  String
   status   StatusUserGroup @default(ACTIVE)
   role     GroupRole       @default(STAFF)
   createBy BigInt          @db.BigInt
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group            Group              @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  UserGroupSupport UserGroupSupport[]
 
-  @@id([userId, groupId])
+  @@id([id])
   @@map("user_groups")
+}
+
+model UserGroupSupport {
+  userGroupId    String
+  groupSupportId String
+
+  userGroup UserGroup @relation(fields: [userGroupId], references: [id], onDelete: Cascade)
+
+  @@id([userGroupId, groupSupportId])
+  @@map("user_group_supports")
 }
