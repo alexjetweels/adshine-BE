@@ -49,16 +49,18 @@ export class GroupsController {
 
   @AuthV2()
   @Get(':id')
-  @ApiResponseCustom([responseListGroupSuccess])
+  // @ApiResponseCustom([responseListGroupSuccess])
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
     return this.groupsService.findOne(id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-  //   return this.groupsService.update(+id, updateGroupDto);
-  // }
+  @AuthV2()
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
+    return this.groupsService.update(id, updateGroupDto);
+  }
 
   // @Delete(':id')
   // remove(@Param('id') id: string) {
