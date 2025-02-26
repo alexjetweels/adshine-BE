@@ -5,7 +5,7 @@ import {
   AuthUser,
   ContextProvider,
 } from 'libs/utils/providers/context.provider';
-import { GroupRole, Role, StatusGroup, User } from '@prisma/client';
+import { GroupRole, GroupType, Role, StatusGroup, User } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ApiException } from 'libs/utils/exception';
 import { ErrorCode } from 'libs/utils/enum';
@@ -13,6 +13,7 @@ import { ListGroupDto } from './dto/list-group.dto';
 import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 import { StatusUserGroup } from '@prisma/client';
 import { schemaPaging } from 'libs/utils/util';
+import { create, map } from 'lodash';
 
 @Injectable()
 export class GroupsService {
@@ -29,7 +30,11 @@ export class GroupsService {
     });
   }
 
-  async create({ managerIds, groupIdsSupport, ...createGroupDto }: CreateGroupDto) {
+  async create({
+    managerIds,
+    groupIdsSupport,
+    ...createGroupDto
+  }: CreateGroupDto) {
     const user = ContextProvider.getAuthUser<AuthUser>();
 
     const countUsers = await this.checkUserInDatabase(managerIds);
@@ -42,24 +47,51 @@ export class GroupsService {
       );
     }
 
-    const newGroup = await this.prismaService.group.create({
-      data: {
-        ...createGroupDto,
-        createBy: user.id,
-        users: {
-          create: managerIds.map((userId) => ({
-            userId,
-            role: GroupRole.MANAGER,
-            createBy: user.id,
-          })),
+    if (groupIdsSupport?.length) {
+      const countGroups = await this.prismaService.group.count({
+        where: {
+          id: {
+            in: groupIdsSupport,
+          },
+          type: GroupType.ORDER,
         },
-      },
-      include: {
-        users: true,
-      },
-    });
+      });
 
-    return newGroup;
+      if (countGroups !== groupIdsSupport.length) {
+        throw new ApiException(
+          'Group order support not found in database',
+          HttpStatus.BAD_GATEWAY,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
+    }
+
+    return await this.prismaService.$transaction(async (prisma) => {
+      const newGroup = await prisma.group.create({
+        data: {
+          ...createGroupDto,
+          createBy: user.id,
+          users: {
+            create: managerIds.map((userId) => ({
+              userId,
+              role: GroupRole.MANAGER,
+              createBy: user.id,
+            })),
+          },
+          supportOrderGroup: {
+            create: groupIdsSupport?.map((groupId) => ({
+              orderGroupId: groupId,
+            })),
+          },
+        },
+        include: {
+          users: true,
+          supportOrderGroup: true,
+        },
+      });
+
+      return newGroup;
+    });
   }
 
   async findAll(listGroupDto: ListGroupDto) {
@@ -153,7 +185,7 @@ export class GroupsService {
       };
     }
 
-    const group = await this.prismaService.group.findFirst({
+    const group = (await this.prismaService.group.findFirst({
       where: {
         id: id,
         ...where,
@@ -179,14 +211,30 @@ export class GroupsService {
             },
           },
         },
+        supportOrderGroup: {
+          select: {
+            orderGroup: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
       },
-    });
+    })) as any;
+
+    if (group && group.supportOrderGroup) {
+      group.supportOrderGroup = group.supportOrderGroup?.map(
+        (sog: any) => sog.orderGroup,
+      );
+    }
 
     return group;
   }
 
-  update(id: number, updateGroupDto: UpdateGroupDto) {
-    return `This action updates a #${id} group`;
+  update(id: string, updateGroupDto: UpdateGroupDto) {
+    return updateGroupDto;
   }
 
   remove(id: number) {

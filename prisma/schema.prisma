@@ -253,16 +253,18 @@ model Group {
   updatedAt   DateTime    @updatedAt
 
   users             UserGroup[]
-  SupportOrderGroup SupportOrderGroup[]
+  supportOrderGroup SupportOrderGroup[] @relation("support_order_group_support_group_id_fkey")
+  orderGroups       SupportOrderGroup[] @relation("support_order_group_order_group_id_fkey")
 
   @@map("groups")
 }
 
 model SupportOrderGroup {
   supportGroupId String
-  orderGroupId   BigInt
+  orderGroupId   String
 
-  supportGroup Group @relation(fields: [supportGroupId], references: [id], onDelete: Cascade)
+  supportGroup Group @relation(fields: [supportGroupId], references: [id], onDelete: Cascade, name: "support_order_group_support_group_id_fkey")
+  orderGroup   Group @relation(fields: [orderGroupId], references: [id], onDelete: Cascade, name: "support_order_group_order_group_id_fkey")
 
   @@id([supportGroupId, orderGroupId])
   @@map("support_order_groups")
@@ -283,7 +285,7 @@ model UserGroup {
 
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   group            Group              @relation(fields: [groupId], references: [id], onDelete: Cascade)
-  UserGroupSupport UserGroupSupport[]
+  userGroupSupport UserGroupSupport[]
 
   @@id([id])
   @@map("user_groups")
