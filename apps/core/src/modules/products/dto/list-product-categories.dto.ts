@@ -6,11 +6,11 @@ import { BaseQueryDto } from 'libs/utils/dto/base-query.dto';
 export class ListProductCategoriesDto extends BaseQueryDto {
   @ApiProperty({
     description: 'inactive product',
-    example: true,
+    example: StatusProduct.ACTIVE,
     enum: StatusProduct,
     enumName: 'StatusProduct',
   })
   @IsOptional()
   @IsEnum(StatusProduct)
-  status: StatusProduct = StatusProduct.ACTIVE;
+  status?: StatusProduct = StatusProduct.ACTIVE;
 }
