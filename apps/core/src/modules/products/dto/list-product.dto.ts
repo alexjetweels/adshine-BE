@@ -16,7 +16,7 @@ export class ListProductDto extends BaseQueryDto {
 
   @ApiProperty({
     description: 'inactive product',
-    example: true,
+    example: StatusProduct.ACTIVE,
     enum: StatusProduct,
     enumName: 'StatusProduct',
   })

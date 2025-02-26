@@ -49,7 +49,7 @@ export class ProductsController {
   @Get('categories')
   @ApiResponseCustom([responseListProductCategorySuccess])
   @HttpCode(HttpStatus.OK)
-  findAllCategories(@Body() body: ListProductCategoriesDto) {
+  findAllCategories(@Query() body: ListProductCategoriesDto) {
     return this.productsService.findAllCategories(body);
   }
 
@@ -77,7 +77,7 @@ export class ProductsController {
   @ApiResponseCustom([responseListProductSuccess])
   @HttpCode(HttpStatus.OK)
   findAll(@Query() query: ListProductDto) {
-    return this.productsService.findAll(query);
+    return this.productsService.findAllProduct(query);
   }
 
   @AuthV2()

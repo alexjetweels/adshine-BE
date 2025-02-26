@@ -160,7 +160,7 @@ export class ProductsService {
     return newProduct;
   }
 
-  async findAll(query: ListProductDto) {
+  async findAllProduct(query: ListProductDto) {
     const where = {} as {
       OR?: object[];
       status?: StatusProduct;
