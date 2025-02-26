@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { StatusProduct } from '@prisma/client';
+import { Transform } from 'class-transformer';
 import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
 import { BaseQueryDto } from 'libs/utils/dto/base-query.dto';
 
@@ -10,6 +11,7 @@ export class ListProductDto extends BaseQueryDto {
     required: true,
   })
   @IsOptional()
+  @Transform(({ value }) => Number(value))
   @IsInt()
   @Min(1)
   categoryId: number;
