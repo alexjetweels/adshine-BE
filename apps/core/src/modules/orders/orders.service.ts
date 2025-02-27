@@ -37,12 +37,26 @@ export class OrdersService {
     }
   }
 
+  checkPermissionInGroup(groupId: string, user: AuthUser) {
+    if (!user?.dataGroup?.[groupId]) {
+      throw new ApiException(
+        'User not not in group',
+        HttpStatus.FORBIDDEN,
+        ErrorCode.FORBIDDEN,
+      );
+    }
+  }
+
   async create(body: CreateOrderDto) {
-    const user = ContextProvider.getAuthUser<User>();
+    const user = ContextProvider.getAuthUser<AuthUser>();
 
     const { orderItems, ...order } = body;
 
     await this.checkProductExist(orderItems.map((item) => item.productId));
+
+    if (body.groupId) {
+      this.checkPermissionInGroup(body.groupId, user);
+    }
 
     const newOrder = await this.prismaService.order.create({
       data: {
@@ -62,15 +76,7 @@ export class OrdersService {
   async findAll(query: ListOrderDto) {
     const user = ContextProvider.getAuthUser<User>();
 
-    const where = {} as {
-      OR?: object[];
-      status?: StatusOrder;
-      userId?: bigint;
-      createdAt?: {
-        gte?: Date;
-        lte?: Date;
-      };
-    };
+    const where = {} as Prisma.OrderWhereInput;
 
     if (user.role !== Role.ADMIN) {
       where.userId = user.id;
@@ -88,6 +94,10 @@ export class OrdersService {
 
     if (query.status) {
       where.status = query.status;
+    }
+
+    if (query.groupId) {
+      where.groupId = query.groupId;
     }
 
     const records = await this.prismaService.order.findMany({
@@ -162,6 +172,10 @@ export class OrdersService {
         HttpStatus.FORBIDDEN,
         ErrorCode.FORBIDDEN,
       );
+    }
+
+    if (body.groupId) {
+      this.checkPermissionInGroup(body.groupId, user);
     }
 
     const { orderItems, ...order } = body;

@@ -14,12 +14,14 @@ import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
-import { AuthV2 } from 'libs/utils';
+import { AuthV2, UUIDField } from 'libs/utils';
 import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
 import {
   responseCreateGroupSuccess,
+  responseDetailGroupSuccess,
   responseListGroupSuccess,
+  responseUpdateGroupSuccess,
 } from './response/schema';
 import { ListGroupDto } from './dto/list-group.dto';
 
@@ -49,14 +51,15 @@ export class GroupsController {
 
   @AuthV2()
   @Get(':id')
-  // @ApiResponseCustom([responseListGroupSuccess])
+  @ApiResponseCustom([responseDetailGroupSuccess])
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
-    return this.groupsService.findOne(id);
+    return this.groupsService.findOne(id, { isView: true });
   }
 
   @AuthV2()
   @Patch(':id')
+  @ApiResponseCustom([responseUpdateGroupSuccess])
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
     return this.groupsService.update(id, updateGroupDto);

@@ -126,7 +126,9 @@ model Order {
   updatedAt   DateTime    @updatedAt
   status      StatusOrder @default(ACTIVE)
   description String?     @db.Text
+  groupId     String?
 
+  group      Group?      @relation(fields: [groupId], references: [id])
   user       User        @relation(fields: [userId], references: [id])
   orderItems OrderItem[]
 
@@ -255,6 +257,7 @@ model Group {
   users             UserGroup[]
   supportOrderGroup SupportOrderGroup[] @relation("support_order_group_support_group_id_fkey")
   orderGroups       SupportOrderGroup[] @relation("support_order_group_order_group_id_fkey")
+  Order             Order[]
 
   @@map("groups")
 }
@@ -282,12 +285,15 @@ model UserGroup {
   status   StatusUserGroup @default(ACTIVE)
   role     GroupRole       @default(STAFF)
   createBy BigInt          @db.BigInt
+  leaderId BigInt?         @db.BigInt
 
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   group            Group              @relation(fields: [groupId], references: [id], onDelete: Cascade)
   userGroupSupport UserGroupSupport[]
 
   @@id([id])
+  @@unique([userId, groupId])
+  @@index([userId, groupId])
   @@map("user_groups")
 }
 

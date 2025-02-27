@@ -3,7 +3,7 @@ import { Role, User } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ErrorCode } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
-import { ContextProvider } from 'libs/utils/providers/context.provider';
+import { AuthUser, ContextProvider } from 'libs/utils/providers/context.provider';
 import { generateHash, randomPassword, schemaPaging } from 'libs/utils/util';
 import { map, omit } from 'lodash';
 import { CoreCreateUserDto } from './dto/create-user.dto';
@@ -78,7 +78,7 @@ export class UserService {
   }
 
   async getUserInfo() {
-    const user = ContextProvider.getAuthUser<User>();
+    const user = ContextProvider.getAuthUser<AuthUser>();
 
     return {
       ...omit(user, ['password']),

@@ -97,38 +97,149 @@ export const responseDetailGroupSuccess: ApiResponseOptions = {
   schema: {
     example: {
       data: {
-        id: 'e730449a-0291-4144-9057-ab2eb2721c39',
-        name: 'order2',
-        description: 'description',
+        id: '2d3b8212-4981-4ba8-b667-a07b98e565a0',
+        name: 'GR SP 22',
+        description: null,
         status: 'ACTIVE',
-        createdAt: '2025-02-25T07:26:36.041Z',
-        updatedAt: '2025-02-25T07:26:36.041Z',
+        createdAt: '2025-02-26T15:36:40.566Z',
+        updatedAt: '2025-02-27T08:52:40.521Z',
         users: [
           {
             userId: 2,
             status: 'ACTIVE',
             role: 'MANAGER',
+            leaderId: null,
             user: {
               id: 2,
               name: 'update1',
               email: 'user01@gmail.com',
+              isBan: false,
             },
+            userGroupSupport: [],
+          },
+          {
+            userId: 4,
+            status: 'ACTIVE',
+            role: 'MANAGER',
+            leaderId: null,
+            user: {
+              id: 4,
+              name: 'Default Name',
+              email: 'user3@gmail.com',
+              isBan: false,
+            },
+            userGroupSupport: [],
           },
           {
             userId: 3,
             status: 'ACTIVE',
-            role: 'MANAGER',
+            role: 'LEADER',
+            leaderId: null,
             user: {
               id: 3,
               name: 'Default Name',
               email: 'user2@gmail.com',
+              isBan: false,
             },
+            userGroupSupport: [],
+          },
+          {
+            userId: 7,
+            status: 'ACTIVE',
+            role: 'LEADER',
+            leaderId: null,
+            user: {
+              id: 7,
+              name: 'Default Name',
+              email: 'user6@gmail.com',
+              isBan: false,
+            },
+            userGroupSupport: [],
+          },
+          {
+            userId: 14,
+            status: 'ACTIVE',
+            role: 'LEADER',
+            leaderId: null,
+            user: {
+              id: 14,
+              name: 'Alex',
+              email: 'aaa@gmail.com',
+              isBan: false,
+            },
+            userGroupSupport: [],
+          },
+          {
+            userId: 5,
+            status: 'ACTIVE',
+            role: 'STAFF',
+            leaderId: 3,
+            user: {
+              id: 5,
+              name: 'Default Name',
+              email: 'user4@gmail.com',
+              isBan: false,
+            },
+            userGroupSupport: [
+              {
+                groupSupportId: '46097793-3017-4a8f-bfa1-069e29dbd870',
+              },
+            ],
+          },
+          {
+            userId: 6,
+            status: 'ACTIVE',
+            role: 'STAFF',
+            leaderId: 3,
+            user: {
+              id: 6,
+              name: 'Default Name',
+              email: 'user5@gmail.com',
+              isBan: false,
+            },
+            userGroupSupport: [
+              {
+                groupSupportId: 'a4cfa44b-ecf7-446a-8745-2e3cb274f1ad',
+              },
+            ],
+          },
+        ],
+        supportOrderGroup: [
+          {
+            id: '46097793-3017-4a8f-bfa1-069e29dbd870',
+            name: 'order2',
+          },
+          {
+            id: 'a4cfa44b-ecf7-446a-8745-2e3cb274f1ad',
+            name: 'GR O 1',
           },
         ],
       },
-      timestamp: '25/02/2025 14:27:11',
-      path: '/api/core/v1/groups/e730449a-0291-4144-9057-ab2eb2721c39',
-      traceId: '79f42cde-e1e6-493f-8c47-7b4335f0ecf5',
+      timestamp: '27/02/2025 15:52:53',
+      path: '/api/core/v1/groups/2d3b8212-4981-4ba8-b667-a07b98e565a0',
+      traceId: '3b00b22b-33a0-44d4-a168-b10c2fe07550',
+    },
+  },
+};
+
+export const responseUpdateGroupSuccess: ApiResponseOptions = {
+  status: HttpStatus.OK,
+  description: 'Response register success example',
+  schema: {
+    example: {
+      data: {
+        id: '2d3b8212-4981-4ba8-b667-a07b98e565a0',
+        name: 'GR SP 22',
+        description: null,
+        status: 'ACTIVE',
+        type: 'SUPPORT',
+        createBy: 1,
+        createdAt: '2025-02-26T15:36:40.566Z',
+        updatedAt: '2025-02-27T09:11:50.709Z',
+      },
+      timestamp: '27/02/2025 16:11:51',
+      path: '/api/core/v1/groups/2d3b8212-4981-4ba8-b667-a07b98e565a0',
+      traceId: 'e6854657-6f8a-4a0b-8a55-75358d8a0016',
     },
   },
 };

@@ -1,11 +1,33 @@
-import { User } from '@prisma/client';
+import {
+  GroupRole,
+  GroupType,
+  StatusUserGroup,
+  User,
+  UserGroup,
+} from '@prisma/client';
 import { KeyPermissionDefaultType } from 'libs/modules/init-data/init';
 import { DateTime } from 'luxon';
 import { ClsServiceManager } from 'nestjs-cls';
 
 export interface AuthUser extends User {
   permissions?: KeyPermissionDefaultType[];
+  dataGroup?: {
+    [key: string]: {
+      role: GroupRole;
+      groupId: string;
+      leaderId: bigint | null;
+      status: StatusUserGroup;
+      group: {
+        name: string;
+        type: GroupType;
+      };
+      userGroupSupport: {
+        groupSupportId: string;
+      }[];
+    };
+  };
 }
+
 export class ContextProvider {
   private static readonly nameSpace = 'request';
 

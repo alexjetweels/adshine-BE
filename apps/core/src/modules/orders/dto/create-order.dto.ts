@@ -7,6 +7,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
   MaxLength,
   ValidateNested,
 } from 'class-validator';
@@ -61,6 +62,16 @@ export class CreateOrderDto {
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   orderItems: OrderItemDto[];
+
+  @ApiProperty({
+    description: 'Group id order',
+    example: '46097793-3017-4a8f-bfa1-069e29dbd870',
+    required: false,
+    type: String,
+  })
+  @IsOptional()
+  @IsUUID('4')
+  groupId?: string;
 
   @ApiProperty({
     description: 'The description of the order',
