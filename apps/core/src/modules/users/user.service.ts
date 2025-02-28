@@ -3,7 +3,10 @@ import { Role, User } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ErrorCode } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
-import { AuthUser, ContextProvider } from 'libs/utils/providers/context.provider';
+import {
+  AuthUser,
+  ContextProvider,
+} from 'libs/utils/providers/context.provider';
 import { generateHash, randomPassword, schemaPaging } from 'libs/utils/util';
 import { map, omit } from 'lodash';
 import { CoreCreateUserDto } from './dto/create-user.dto';
@@ -23,6 +26,7 @@ export class UserService {
         name: true,
         isBan: true,
         createdAt: true,
+        role: true,
         UserPermissionGroup: {
           select: {
             permissionGroup: {
@@ -61,6 +65,7 @@ export class UserService {
       name: user.name,
       isBan: user.isBan,
       createdAt: user.createdAt,
+      role: user.role,
       permissionGroups: user.UserPermissionGroup.map((pg) => ({
         id: pg.permissionGroup.id,
         name: pg.permissionGroup.name,
@@ -73,6 +78,31 @@ export class UserService {
         }),
       })),
     };
+
+    if (data.role !== Role.ADMIN) {
+      const userGroup = await this.prismaService.userGroup.findMany({
+        where: { userId: userId },
+        select: {
+          groupId: true,
+          role: true,
+          leaderId: true,
+          status: true,
+          group: {
+            select: {
+              name: true,
+              type: true,
+            },
+          },
+          userGroupSupport: {
+            select: {
+              groupSupportId: true,
+            },
+          },
+        },
+      });
+
+      Object.assign(data, { userGroup });
+    }
 
     return { ...data, permissionsUser: Array.from(permissionsUser) };
   }
@@ -104,6 +134,13 @@ export class UserService {
       },
       take: query.limit,
       skip: (query.page - 1) * query.limit,
+      include: {
+        UserGroup: {
+          select: {
+            id: true,
+          },
+        },
+      },
     });
 
     const total = await this.prismaService.user.count({ where });
@@ -115,6 +152,7 @@ export class UserService {
         name: record.name,
         isBan: record.isBan,
         createdAt: record.createdAt,
+        isJoinGroup: record.UserGroup.length > 0,
       };
     });
 

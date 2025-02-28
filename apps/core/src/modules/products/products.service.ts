@@ -181,6 +181,20 @@ export class ProductsService {
 
     const records = await this.prismaService.product.findMany({
       where,
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
       orderBy: {
         id: 'desc',
       },
@@ -206,7 +220,23 @@ export class ProductsService {
   }
 
   async findOneProduct(id: number) {
-    return await this.prismaService.product.findUnique({ where: { id } });
+    return await this.prismaService.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        status: true,
+        createdAt: true,
+        updatedAt: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
   }
 
   async findOneProductCategory(id: number) {

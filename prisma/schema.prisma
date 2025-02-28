@@ -32,6 +32,7 @@ model User {
   Order               Order[]
   UserPermissionGroup UserPermissionGroup[]
   UserGroup           UserGroup[]
+  Notification        Notification[]
 
   @@index([email])
   @@map("users")
@@ -168,6 +169,8 @@ model Notification {
   createBy  BigInt             @db.BigInt
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
+
+  create User @relation(fields: [createBy], references: [id])
 
   @@map("notifications")
 }

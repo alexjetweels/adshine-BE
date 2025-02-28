@@ -36,6 +36,33 @@ export class GroupsService {
     });
   }
 
+  async checkUserJoinOtherGroup(
+    userIds: number[],
+    optional?: { excludeGroupId?: string },
+  ) {
+    const result = await this.prismaService.$queryRaw`
+      SELECT u.id AS userId, 
+             EXISTS (
+                 SELECT 1 FROM user_groups ug 
+                 WHERE ug."userId" = u.id 
+                 ${optional?.excludeGroupId ? Prisma.sql`AND ug."groupId" != ${optional.excludeGroupId}` : Prisma.empty}
+                 LIMIT 1
+             ) AS "isGroup"
+      FROM users u
+      WHERE u.id IN (${Prisma.join(userIds)});
+    `;
+
+    (result as any).forEach((user: any) => {
+      if (user.isGroup) {
+        throw new ApiException(
+          'Exist User join other group',
+          HttpStatus.BAD_GATEWAY,
+          ErrorCode.INVALID_INPUT,
+        );
+      }
+    });
+  }
+
   async create({
     managerIds,
     groupIdsSupport,
@@ -52,6 +79,8 @@ export class GroupsService {
         ErrorCode.INVALID_INPUT,
       );
     }
+
+    await this.checkUserJoinOtherGroup(managerIds);
 
     if (groupIdsSupport?.length) {
       const countGroups = await this.prismaService.group.count({
@@ -201,6 +230,7 @@ export class GroupsService {
         status: true,
         createdAt: true,
         updatedAt: true,
+        type: true,
         users: {
           select: {
             userId: true,
@@ -240,6 +270,7 @@ export class GroupsService {
       select = {
         id: true,
         status: true,
+        type: true,
         users: {
           select: {
             userId: true,
@@ -335,6 +366,7 @@ export class GroupsService {
 
     let managerIdsUpdate: number[] | undefined = undefined;
     let groupIdsSupportUpdate: string[] | undefined = undefined;
+    let leaderIdsGroup = leaderIds || [];
     const isPermissionUpdate =
       user.role === Role.ADMIN ||
       user.permissions?.includes(PERMISSION_KEYS.GROUP_UPDATE);
@@ -356,19 +388,31 @@ export class GroupsService {
         );
       }
       managerIdsUpdate = managerIds;
-      groupIdsSupportUpdate = groupIdsSupport;
+      if (group.type === GroupType.SUPPORT) {
+        groupIdsSupportUpdate = groupIdsSupport;
+      }
     }
-    groupIdsSupportUpdate =
-      groupIdsSupportUpdate ||
-      group.supportOrderGroup?.map((sog: any) => sog.id);
+    if (group.type === GroupType.SUPPORT) {
+      groupIdsSupportUpdate =
+        groupIdsSupportUpdate ||
+        group.supportOrderGroup?.map((sog: any) => sog.id);
+      leaderIdsGroup = [];
+    }
 
     const { newStaffIds, leaderStaff, groupIdsSupportStaff } = (
       staff || []
     )?.reduce(
       (acc: any, cur) => {
         acc.newStaffIds.push(cur.userId);
-        acc.leaderStaff.push(cur.leaderId);
-        acc.groupIdsSupportStaff.push(...(cur.groupIdsSupport || []));
+
+        if (group.type === GroupType.SUPPORT) {
+          acc.groupIdsSupportStaff.push(...(cur.groupIdsSupport || []));
+        }
+
+        if (group.type === GroupType.ORDER) {
+          cur.leaderId && acc.leaderStaff.push(cur.leaderId);
+        }
+
         return acc;
       },
       {
@@ -377,7 +421,7 @@ export class GroupsService {
         groupIdsSupportStaff: [] as string[],
       },
     );
-
+    console.log({leaderStaff})
     if (groupIdsSupportUpdate?.length) {
       const countGroups = await this.prismaService.group.count({
         where: {
@@ -411,11 +455,10 @@ export class GroupsService {
     }
 
     if (leaderStaff.length) {
-      const leaderIdsGroup = leaderIds;
       const setLeaderIds = Array.from(
         new Set([...leaderIdsGroup, ...leaderStaff]),
       );
-
+      console.log({ leaderIdsGroup, setLeaderIds, leaderIds: leaderIdsGroup });
       if (leaderIdsGroup.length !== setLeaderIds.length) {
         throw new ApiException(
           'Leader staff is not leader group',
@@ -425,10 +468,10 @@ export class GroupsService {
       }
     }
 
-    if (managerIds?.length || leaderIds?.length || newStaffIds?.length) {
+    if (managerIds?.length || leaderIdsGroup?.length || newStaffIds?.length) {
       const userIdsMerge = [
         ...(managerIds || []),
-        ...(leaderIds || []),
+        ...(leaderIdsGroup || []),
         ...(newStaffIds || []),
       ];
 
@@ -449,6 +492,8 @@ export class GroupsService {
           ErrorCode.INVALID_INPUT,
         );
       }
+
+      await this.checkUserJoinOtherGroup(userIdsMerge, { excludeGroupId: id });
     }
 
     return await this.prismaService.$transaction(async (prisma) => {
@@ -456,8 +501,7 @@ export class GroupsService {
 
       if (
         (managerIdsUpdate && managerIdsUpdate.length) ||
-        leaderIds.length ||
-        staff?.length
+        leaderIdsGroup.length
       ) {
         const datAdd = [];
 
@@ -472,9 +516,9 @@ export class GroupsService {
           );
         }
 
-        if (leaderIds.length) {
+        if (leaderIdsGroup.length) {
           datAdd.push(
-            ...leaderIds.map((userId) => ({
+            ...leaderIdsGroup.map((userId) => ({
               userId,
               role: GroupRole.LEADER,
               createBy: user.id,
@@ -525,7 +569,7 @@ export class GroupsService {
         const staffToAdd = staff.map((s) => ({
           userId: s.userId,
           role: GroupRole.STAFF,
-          leaderId: s.leaderId,
+          leaderId: group.type === GroupType.ORDER ? s.leaderId : undefined,
           createBy: user.id,
           status: StatusUserGroup.ACTIVE,
           groupId: id,
@@ -542,18 +586,20 @@ export class GroupsService {
           {} as Record<number, UserGroup>,
         );
 
-        const userGroupSupportsToAdd = staff.flatMap(
-          (s) =>
-            s.groupIdsSupport?.map((groupSupportId) => ({
-              userGroupId: createdUserGroupsByUserId[s.userId].id,
-              groupSupportId,
-            })) || [],
-        );
+        if (group.type === GroupType.SUPPORT) {
+          const userGroupSupportsToAdd = staff.flatMap(
+            (s) =>
+              s.groupIdsSupport?.map((groupSupportId) => ({
+                userGroupId: createdUserGroupsByUserId[s.userId].id,
+                groupSupportId,
+              })) || [],
+          );
 
-        if (userGroupSupportsToAdd.length) {
-          await prisma.userGroupSupport.createMany({
-            data: userGroupSupportsToAdd,
-          });
+          if (userGroupSupportsToAdd.length) {
+            await prisma.userGroupSupport.createMany({
+              data: userGroupSupportsToAdd,
+            });
+          }
         }
       }
 

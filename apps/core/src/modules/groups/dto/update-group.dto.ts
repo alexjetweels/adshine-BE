@@ -27,10 +27,10 @@ export class StaffGroupDto {
   @ApiProperty({
     description: 'Leader id (required leaderId is leader group)',
     example: 2,
-    required: true,
+    required: false,
     type: Number,
   })
-  @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   @Min(1)
   leaderId: number;
