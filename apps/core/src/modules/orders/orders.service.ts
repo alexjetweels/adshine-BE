@@ -38,7 +38,7 @@ export class OrdersService {
   }
 
   checkPermissionInGroup(groupId: string, user: AuthUser) {
-    if (!user?.dataGroup?.[groupId]) {
+    if (!user?.dataGroups?.[groupId]) {
       throw new ApiException(
         'User not not in group',
         HttpStatus.FORBIDDEN,
@@ -54,9 +54,21 @@ export class OrdersService {
 
     await this.checkProductExist(orderItems.map((item) => item.productId));
 
-    if (body.groupId) {
-      this.checkPermissionInGroup(body.groupId, user);
+    if (order.groupId) {
+      this.checkPermissionInGroup(order.groupId, user);
     }
+
+    if (!order.groupId) {
+      order.groupId = user?.dataGroupIdsOrder?.[0] || undefined;
+    }
+
+    // if (!order.groupId) {
+    //   throw new ApiException(
+    //     'User not in group order',
+    //     HttpStatus.FORBIDDEN,
+    //     ErrorCode.FORBIDDEN,
+    //   );
+    // }
 
     const newOrder = await this.prismaService.order.create({
       data: {
@@ -174,9 +186,9 @@ export class OrdersService {
       );
     }
 
-    if (body.groupId) {
-      this.checkPermissionInGroup(body.groupId, user);
-    }
+    // if (body.groupId) {
+    //   this.checkPermissionInGroup(body.groupId, user);
+    // }
 
     const { orderItems, ...order } = body;
 

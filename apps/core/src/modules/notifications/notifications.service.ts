@@ -55,7 +55,7 @@ export class NotificationsService {
     const records = await this.prismaService.notification.findMany({
       where,
       orderBy: {
-        id: 'desc',
+        createdAt: 'desc',
       },
       select: {
         id: true,
