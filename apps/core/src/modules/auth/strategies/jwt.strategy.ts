@@ -57,52 +57,55 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user) {
       throw new ApiException('Unauthorize', HttpStatus.UNAUTHORIZED);
     }
-    const permissionsUser = Array.from(
-      new Set(
-        user.UserPermissionGroup.flatMap((pg) =>
-          pg.permissionGroup.permissions.map((p) => p.permission.id),
-        ),
-      ),
-    );
-    Object.assign(user, { permissions: permissionsUser });
 
-    const userGroup = await this.prismaService.userGroup.findMany({
-      where: { userId: args.userId },
-      select: {
-        groupId: true,
-        role: true,
-        leaderId: true,
-        status: true,
-        group: {
-          select: {
-            name: true,
-            type: true,
-          },
-        },
-        userGroupSupport: {
-          select: {
-            groupSupportId: true,
-          },
-        },
-      },
-    });
-
-    const dataGroupUser = userGroup.reduce(
-      (acc, cur) => {
-        acc[cur.groupId] = {
-          role: cur.role,
-          leaderId: cur.leaderId,
-          group: cur.group,
-          userGroupSupport: cur.userGroupSupport.map(
-            (ugs) => ugs.groupSupportId,
+    if (user.role !== Role.ADMIN) {
+      const permissionsUser = Array.from(
+        new Set(
+          user.UserPermissionGroup.flatMap((pg) =>
+            pg.permissionGroup.permissions.map((p) => p.permission.id),
           ),
-        };
-        return acc;
-      },
-      {} as Record<string, any>,
-    );
+        ),
+      );
+      Object.assign(user, { permissions: permissionsUser });
 
-    Object.assign(user, { dataGroups: dataGroupUser });
+      const userGroup = await this.prismaService.userGroup.findMany({
+        where: { userId: args.userId },
+        select: {
+          groupId: true,
+          role: true,
+          leaderId: true,
+          status: true,
+          group: {
+            select: {
+              name: true,
+              type: true,
+            },
+          },
+          userGroupSupport: {
+            select: {
+              groupSupportId: true,
+            },
+          },
+        },
+      });
+
+      const dataGroupUser = userGroup.reduce(
+        (acc, cur) => {
+          acc[cur.groupId] = {
+            role: cur.role,
+            leaderId: cur.leaderId,
+            group: cur.group,
+            userGroupSupport: cur.userGroupSupport.map(
+              (ugs) => ugs.groupSupportId,
+            ),
+          };
+          return acc;
+        },
+        {} as Record<string, any>,
+      );
+
+      Object.assign(user, { dataGroups: dataGroupUser });
+    }
 
     if (user.isBan) {
       throw new ApiException('User is banned', HttpStatus.FORBIDDEN);

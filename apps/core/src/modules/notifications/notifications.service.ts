@@ -8,6 +8,7 @@ import { ListNotificationDto } from './dto/list-notifation.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { ApiException } from 'libs/utils/exception';
 import { ErrorCode } from 'libs/utils/enum';
+import e from 'express';
 
 @Injectable()
 export class NotificationsService {
@@ -55,6 +56,23 @@ export class NotificationsService {
       where,
       orderBy: {
         id: 'desc',
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        type: true,
+        status: true,
+        iconType: true,
+        createdAt: true,
+        updatedAt: true,
+        create: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
       take: listNotificationDto.limit,
       skip: (listNotificationDto.page - 1) * listNotificationDto.limit,
