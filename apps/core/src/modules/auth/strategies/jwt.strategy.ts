@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Role } from '@prisma/client';
+import { GroupType, Role } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { TokenType } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
@@ -89,22 +89,39 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         },
       });
 
-      const dataGroupUser = userGroup.reduce(
-        (acc, cur) => {
-          acc[cur.groupId] = {
-            role: cur.role,
-            leaderId: cur.leaderId,
-            group: cur.group,
-            userGroupSupport: cur.userGroupSupport.map(
-              (ugs) => ugs.groupSupportId,
-            ),
-          };
-          return acc;
-        },
-        {} as Record<string, any>,
-      );
+      const { dataGroupUser, dataGroupIdsOrder, dataGroupIdsSupport } =
+        userGroup.reduce(
+          (acc, cur) => {
+            acc.dataGroupUser[cur.groupId] = {
+              role: cur.role,
+              leaderId: cur.leaderId,
+              group: cur.group,
+              userGroupSupport: cur.userGroupSupport.map(
+                (ugs) => ugs.groupSupportId,
+              ),
+            };
 
-      Object.assign(user, { dataGroups: dataGroupUser });
+            if (cur.group.type === GroupType.ORDER) {
+              acc.dataGroupIdsOrder.push(cur.groupId);
+            }
+
+            if (cur.group.type === GroupType.SUPPORT) {
+              acc.dataGroupIdsSupport.push(cur.groupId);
+            }
+            return acc;
+          },
+          {
+            dataGroupUser: {} as Record<string, any>,
+            dataGroupIdsOrder: [] as string[],
+            dataGroupIdsSupport: [] as string[],
+          },
+        );
+
+      Object.assign(user, {
+        dataGroups: dataGroupUser,
+        dataGroupIdsOrder,
+        dataGroupIdsSupport,
+      });
     }
 
     if (user.isBan) {

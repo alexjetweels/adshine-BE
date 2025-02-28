@@ -11,7 +11,7 @@ import { ClsServiceManager } from 'nestjs-cls';
 
 export interface AuthUser extends User {
   permissions?: KeyPermissionDefaultType[];
-  dataGroup?: {
+  dataGroups?: {
     [key: string]: {
       role: GroupRole;
       groupId: string;
@@ -26,6 +26,8 @@ export interface AuthUser extends User {
       }[];
     };
   };
+  dataGroupIdsOrder?: string[];
+  dataGroupIdsSupport?: string[];
 }
 
 export class ContextProvider {
