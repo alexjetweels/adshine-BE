@@ -103,16 +103,7 @@ export class GroupsService {
   async findAll(listGroupDto: ListGroupDto) {
     const user = ContextProvider.getAuthUser<AuthUser>();
 
-    const where = {} as {
-      OR?: object[];
-      users?: {
-        some: {
-          userId: bigint;
-          status: StatusUserGroup;
-        };
-      };
-      status?: StatusGroup;
-    };
+    const where = {} as Prisma.GroupWhereInput;
 
     if (listGroupDto.search) {
       where.OR = [
@@ -145,6 +136,10 @@ export class GroupsService {
 
     if (listGroupDto.status) {
       where.status = listGroupDto.status;
+    }
+
+    if (listGroupDto.type) {
+      where.type = listGroupDto.type;
     }
 
     const records = await this.prismaService.group.findMany({
