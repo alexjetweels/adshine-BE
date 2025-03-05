@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { StatusGroup } from '@prisma/client';
+import { GroupType, StatusGroup } from '@prisma/client';
 import { IsEnum, IsOptional } from 'class-validator';
 import { BaseQueryDto } from 'libs/utils/dto/base-query.dto';
 
@@ -13,4 +13,15 @@ export class ListGroupDto extends BaseQueryDto {
   @IsOptional()
   @IsEnum(StatusGroup)
   status?: StatusGroup = StatusGroup.ACTIVE;
+
+  @ApiProperty({
+    description: 'Group type',
+    example: GroupType.ORDER,
+    required: false,
+    enum: GroupType,
+    enumName: 'GroupType',
+  })
+  @IsOptional()
+  @IsEnum(GroupType)
+  type: GroupType;
 }
