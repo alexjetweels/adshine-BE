@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { GroupType, Role } from '@prisma/client';
+import { GroupRole, GroupType, Role } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { TokenType } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
@@ -79,6 +79,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
             select: {
               name: true,
               type: true,
+              supportOrderGroup: {
+                select: {
+                  orderGroupId: true,
+                },
+              },
             },
           },
           userGroupSupport: {
@@ -104,7 +109,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
               (ugs) => ugs.groupSupportId,
             ),
           };
-
           if (cur.group.type === GroupType.ORDER) {
             acc.dataGroupIdsOrder.push(cur.groupId);
           }
@@ -114,6 +118,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
             acc.dataGroupIdsOrderSupport.push(
               ...(acc.dataGroupUser[cur.groupId]?.userGroupSupport || []),
             );
+
+            if (cur.role === GroupRole.MANAGER) {
+              acc.dataGroupIdsOrderSupport.push(
+                ...(cur.group?.supportOrderGroup?.map(
+                  (sog) => sog.orderGroupId,
+                ) || []),
+              );
+            }
           }
           return acc;
         },
@@ -129,7 +141,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         dataGroups: dataGroupUser,
         dataGroupIdsOrder,
         dataGroupIdsSupport,
-        dataGroupIdsOrderSupport,
+        dataGroupIdsOrderSupport: Array.from(new Set(dataGroupIdsOrderSupport)),
       });
     }
 
