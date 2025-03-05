@@ -8,7 +8,7 @@ export class UpdateOrderDto extends PartialType(
 ) {
   @ApiProperty({
     description: 'remove order',
-    example: 'INACTIVE',
+    example: StatusOrder.INACTIVE,
     required: false,
     enum: StatusOrder,
     enumName: 'StatusOrder',

@@ -52,8 +52,11 @@ export const PERMISSION_DEFAULT = {
     description: 'Tạo đơn hàng mới',
   },
   ORDER_UPDATE: {
+    description: 'Xóa hoặc khôi phục đơn hàng.',
+  },
+  ORDER_UPDATE_STATE: {
     description:
-      'Chỉnh sửa thông tin đơn hàng, xóa đơn hàng, đối với người tạo đơn hàng sẽ được xóa đơn hàng trong 1 số trường hợp nhất định',
+      'Chỉnh sửa trạng thái đơn hàng bao gồm xác nhận đã nhận hàng / hủy yêu cầu. (Trường hợp xác nhận đã giao hàng mặc định staff support order có quyền này)',
   },
 };
 

@@ -33,6 +33,7 @@ model User {
   UserPermissionGroup UserPermissionGroup[]
   UserGroup           UserGroup[]
   Notification        Notification[]
+  orderHistory        OrderHistory[]
 
   @@index([email])
   @@map("users")
@@ -119,6 +120,15 @@ enum StatusOrder {
   ACTIVE
 }
 
+enum OrderState {
+  CREATED
+  PRODUCT_DELIVERED
+  COMPLETED
+  CANCELED
+  REMOVE
+  UN_REMOVE
+}
+
 model Order {
   id          BigInt      @id @default(autoincrement())
   userId      BigInt      @db.BigInt
@@ -126,14 +136,30 @@ model Order {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   status      StatusOrder @default(ACTIVE)
+  state       OrderState  @default(CREATED)
   description String?     @db.Text
   groupId     String?
 
   group      Group?      @relation(fields: [groupId], references: [id])
   user       User        @relation(fields: [userId], references: [id])
   orderItems OrderItem[]
+  orderHistory OrderHistory[]
 
   @@map("orders")
+}
+
+model OrderHistory {
+  id        BigInt      @id @default(autoincrement())
+  orderId   BigInt      @db.BigInt
+  userId    BigInt      @db.BigInt
+  action    OrderState
+  createdAt DateTime    @default(now())
+  note      String?     @db.Text
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@map("order_history")
 }
 
 model OrderItem {

@@ -12,7 +12,7 @@ const ISOStringRegex = new RegExp(
 export class CustomValidateIsPassword implements ValidatorConstraintInterface {
   validate(text: string, args: ValidationArguments) {
     const IsPassword =
-      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[_@./!@#$%^*(),~`'":;\\\?}\<\>\]\{[&+-]).{6,}$/;
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{}|;:,.<>?]).{6,}$/;
 
     return IsPassword.test(text);
   }

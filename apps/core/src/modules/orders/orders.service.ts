@@ -1,5 +1,12 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { Prisma, Role, StatusOrder, User } from '@prisma/client';
+import {
+  Prisma,
+  Role,
+  StatusOrder,
+  User,
+  OrderState,
+  Order,
+} from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ErrorCode } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
@@ -7,11 +14,12 @@ import {
   AuthUser,
   ContextProvider,
 } from 'libs/utils/providers/context.provider';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
-import { ListOrderDto } from './dto/list-order.dto';
 import { schemaPaging } from 'libs/utils/util';
 import { map } from 'lodash';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { ListOrderDto } from './dto/list-order.dto';
+import { UpdateOrderStateDto } from './dto/update-order-state';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 
 @Injectable()
@@ -62,14 +70,13 @@ export class OrdersService {
       order.groupId = user?.dataGroupIdsOrder?.[0] || undefined;
     }
 
-    // if (!order.groupId) {
-    //   throw new ApiException(
-    //     'User not in group order',
-    //     HttpStatus.FORBIDDEN,
-    //     ErrorCode.FORBIDDEN,
-    //   );
-    // }
-
+    if (!order.groupId) {
+      throw new ApiException(
+        'Bạn đang k chọn group hoặc đang không thuộc group nào',
+        HttpStatus.NOT_FOUND,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
     const newOrder = await this.prismaService.order.create({
       data: {
         ...order,
@@ -86,12 +93,22 @@ export class OrdersService {
   }
 
   async findAll(query: ListOrderDto) {
-    const user = ContextProvider.getAuthUser<User>();
+    const user = ContextProvider.getAuthUser<AuthUser>();
 
     const where = {} as Prisma.OrderWhereInput;
 
+    if (query.groupId) {
+      where.groupId = query.groupId;
+    }
+
     if (user.role !== Role.ADMIN) {
-      where.userId = user.id;
+      // query in orders
+      where.groupId = {
+        in: [
+          ...(user.dataGroupIdsOrder || []),
+          ...(user.dataGroupIdsOrderSupport || []),
+        ],
+      };
     }
 
     if (query.startTime || query.endTime) {
@@ -106,10 +123,6 @@ export class OrdersService {
 
     if (query.status) {
       where.status = query.status;
-    }
-
-    if (query.groupId) {
-      where.groupId = query.groupId;
     }
 
     const records = await this.prismaService.order.findMany({
@@ -169,60 +182,187 @@ export class OrdersService {
 
     if (!orderCurrent) {
       throw new ApiException(
-        'Order not found',
+        'Không tìm thấy đơn hàng',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
     }
 
+    const { orderItems, ...order } = body;
+
+    return await this.prismaService.$transaction(async (prisma) => {
+      await prisma.order.update({
+        where: { id },
+        data: order,
+      });
+
+      if (orderItems?.length) {
+        const { productIds, newOrderItems } = orderItems.reduce(
+          (acc, item) => {
+            acc.productIds.push(item.productId);
+            acc.newOrderItems.push({
+              ...item,
+              orderId: id,
+            });
+            return acc;
+          },
+          {
+            productIds: [] as bigint[],
+            newOrderItems: [] as Prisma.OrderItemCreateManyInput[],
+          },
+        );
+        await this.checkProductExist(productIds);
+        await prisma.orderItem.deleteMany({
+          where: { orderId: id },
+        });
+        await prisma.orderItem.createMany({
+          data: newOrderItems,
+        });
+      }
+
+      if (order.status && order.status !== orderCurrent.status) {
+        const statusOrderHistory =
+          order.status === StatusOrder.ACTIVE
+            ? OrderState.UN_REMOVE
+            : OrderState.REMOVE;
+        await prisma.orderHistory.create({
+          data: {
+            orderId: id,
+            action: statusOrderHistory,
+            userId: user.id,
+          },
+        });
+      }
+      return body;
+    });
+  }
+
+  validateUpdateStateOrder(order: Order, state: OrderState) {
     if (
-      orderCurrent.userId !== user.id ||
-      !user?.permissions?.includes(PERMISSION_KEYS.ORDER_UPDATE)
+      [OrderState.CANCELED, OrderState.COMPLETED].includes(
+        order.state as 'CANCELED' | 'COMPLETED',
+      )
+    ) {
+      const message = {
+        [OrderState.CANCELED]: 'Đơn hàng đã bị hủy',
+        [OrderState.COMPLETED]: 'Đơn hàng đã hoàn thành',
+      } as {
+        [x: string]: string;
+      };
+      throw new ApiException(
+        message[order.state],
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    if (state === OrderState.CANCELED && order.state !== OrderState.CREATED) {
+      throw new ApiException(
+        'Bạn không thể hủy khi đơn hàng không còn ở trạng thái tạo',
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    if (
+      state === OrderState.PRODUCT_DELIVERED &&
+      order.state !== OrderState.CREATED
     ) {
       throw new ApiException(
-        'User not permission ORDER_UPDATE or not owner order',
+        'Bạn không thể chuyển trạng thái đơn hàng sang đã giao hàng khi đơn hàng không còn ở trạng thái tạo',
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    if (
+      state === OrderState.COMPLETED &&
+      order.state !== OrderState.PRODUCT_DELIVERED
+    ) {
+      throw new ApiException(
+        'Bạn không thể chuyển trạng thái đơn hàng sang đã hoàn thành khi đơn hàng không còn ở trạng thái đã giao hàng',
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+  }
+
+  validatePermissionUpdateStateOrder(
+    order: Order,
+    user: AuthUser,
+    state: OrderState,
+  ) {
+    if (
+      user.role === Role.ADMIN ||
+      user.permissions?.includes(PERMISSION_KEYS.ORDER_UPDATE_STATE)
+    ) {
+      return;
+    }
+
+    if (
+      state !== OrderState.PRODUCT_DELIVERED &&
+      order.groupId &&
+      (!user.dataGroupIdsOrder?.includes(order.groupId) ||
+        !user.permissions?.includes(PERMISSION_KEYS.ORDER_UPDATE_STATE))
+    ) {
+      throw new ApiException(
+        'Bạn không có quyền xác nhận hoàn thành hay hủy đơn hàng này',
         HttpStatus.FORBIDDEN,
         ErrorCode.FORBIDDEN,
       );
     }
 
-    // if (body.groupId) {
-    //   this.checkPermissionInGroup(body.groupId, user);
-    // }
-
-    const { orderItems, ...order } = body;
-
-    await this.prismaService.order.update({
-      where: { id },
-      data: order,
-    });
-
-    if (orderItems?.length) {
-      const { productIds, newOrderItems } = orderItems.reduce(
-        (acc, item) => {
-          acc.productIds.push(item.productId);
-          acc.newOrderItems.push({
-            ...item,
-            orderId: id,
-          });
-          return acc;
-        },
-        {
-          productIds: [] as bigint[],
-          newOrderItems: [] as Prisma.OrderItemCreateManyInput[],
-        },
+    if (
+      state === OrderState.PRODUCT_DELIVERED &&
+      order.groupId &&
+      !user.dataGroupIdsOrderSupport?.includes(order.groupId)
+    ) {
+      throw new ApiException(
+        'Bạn không có quyền xác nhận đã giao hàng cho đơn hàng này',
+        HttpStatus.FORBIDDEN,
+        ErrorCode.FORBIDDEN,
       );
-      await this.checkProductExist(productIds);
-      await this.prismaService.orderItem.deleteMany({ where: { orderId: id } });
-      await this.prismaService.orderItem.createMany({
-        data: newOrderItems,
-      });
     }
-
-    return body;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  async updateState(id: number, body: UpdateOrderStateDto) {
+    const user = ContextProvider.getAuthUser<AuthUser>();
+    const orderCurrent = await this.findOne(id);
+
+    if (!orderCurrent) {
+      throw new ApiException(
+        'Không tìm thấy đơn hàng',
+        HttpStatus.NOT_FOUND,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    if (orderCurrent.status === StatusOrder.INACTIVE) {
+      throw new ApiException(
+        'Đơn hàng đã bị xóa',
+        HttpStatus.BAD_REQUEST,
+        ErrorCode.INVALID_INPUT,
+      );
+    }
+
+    this.validatePermissionUpdateStateOrder(orderCurrent, user, body.state);
+    this.validateUpdateStateOrder(orderCurrent, body.state);
+
+    return await this.prismaService.$transaction(async (prisma) => {
+      await prisma.order.update({
+        where: { id },
+        data: { state: body.state },
+      });
+
+      await prisma.orderHistory.create({
+        data: {
+          orderId: id,
+          action: body.state,
+          userId: user.id,
+        },
+      });
+
+      return body;
+    });
   }
 }
