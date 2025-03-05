@@ -6,7 +6,7 @@ import {
   Param,
   Patch,
   Post,
-  Query
+  Query,
 } from '@nestjs/common';
 import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 import { AuthV2 } from 'libs/utils';
@@ -20,6 +20,7 @@ import {
   responseCreateOrderSuccess,
   responseListOrderSuccess,
 } from './response/schema';
+import { UpdateOrderStateDto } from './dto/update-order-state';
 
 @CoreControllers({
   path: 'orders',
@@ -45,11 +46,19 @@ export class OrdersController {
     return this.ordersService.findAll(query);
   }
 
-  @AuthV2()
+  @AuthV2([PERMISSION_KEYS.ORDER_UPDATE])
   @Patch(':id')
   @ApiResponseCustom([])
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: number, @Body() body: UpdateOrderDto) {
     return this.ordersService.update(id, body);
+  }
+
+  @AuthV2()
+  @Patch(':id/state')
+  @ApiResponseCustom([])
+  @HttpCode(HttpStatus.OK)
+  updateState(@Param('id') id: number, @Body() body: UpdateOrderStateDto) {
+    return this.ordersService.updateState(id, body);
   }
 }

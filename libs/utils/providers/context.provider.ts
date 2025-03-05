@@ -28,6 +28,7 @@ export interface AuthUser extends User {
   };
   dataGroupIdsOrder?: string[];
   dataGroupIdsSupport?: string[];
+  dataGroupIdsOrderSupport?: string[];
 }
 
 export class ContextProvider {

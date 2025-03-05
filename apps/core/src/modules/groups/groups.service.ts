@@ -55,7 +55,7 @@ export class GroupsService {
     (result as any).forEach((user: any) => {
       if (user.isGroup) {
         throw new ApiException(
-          'Exist User join other group',
+          'Tồn tại user đã tham gia group khác',
           HttpStatus.BAD_GATEWAY,
           ErrorCode.INVALID_INPUT,
         );
@@ -416,7 +416,7 @@ export class GroupsService {
         groupIdsSupportStaff: [] as string[],
       },
     );
-    console.log({leaderStaff})
+    console.log({ leaderStaff });
     if (groupIdsSupportUpdate?.length) {
       const countGroups = await this.prismaService.group.count({
         where: {

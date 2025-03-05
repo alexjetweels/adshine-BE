@@ -89,38 +89,47 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         },
       });
 
-      const { dataGroupUser, dataGroupIdsOrder, dataGroupIdsSupport } =
-        userGroup.reduce(
-          (acc, cur) => {
-            acc.dataGroupUser[cur.groupId] = {
-              role: cur.role,
-              leaderId: cur.leaderId,
-              group: cur.group,
-              userGroupSupport: cur.userGroupSupport.map(
-                (ugs) => ugs.groupSupportId,
-              ),
-            };
+      const {
+        dataGroupUser,
+        dataGroupIdsOrder,
+        dataGroupIdsSupport,
+        dataGroupIdsOrderSupport,
+      } = userGroup.reduce(
+        (acc, cur) => {
+          acc.dataGroupUser[cur.groupId] = {
+            role: cur.role,
+            leaderId: cur.leaderId,
+            group: cur.group,
+            userGroupSupport: cur.userGroupSupport.map(
+              (ugs) => ugs.groupSupportId,
+            ),
+          };
 
-            if (cur.group.type === GroupType.ORDER) {
-              acc.dataGroupIdsOrder.push(cur.groupId);
-            }
+          if (cur.group.type === GroupType.ORDER) {
+            acc.dataGroupIdsOrder.push(cur.groupId);
+          }
 
-            if (cur.group.type === GroupType.SUPPORT) {
-              acc.dataGroupIdsSupport.push(cur.groupId);
-            }
-            return acc;
-          },
-          {
-            dataGroupUser: {} as Record<string, any>,
-            dataGroupIdsOrder: [] as string[],
-            dataGroupIdsSupport: [] as string[],
-          },
-        );
+          if (cur.group.type === GroupType.SUPPORT) {
+            acc.dataGroupIdsSupport.push(cur.groupId);
+            acc.dataGroupIdsOrderSupport.push(
+              ...(acc.dataGroupUser[cur.groupId]?.userGroupSupport || []),
+            );
+          }
+          return acc;
+        },
+        {
+          dataGroupUser: {} as Record<string, any>,
+          dataGroupIdsOrder: [] as string[],
+          dataGroupIdsSupport: [] as string[],
+          dataGroupIdsOrderSupport: [] as string[],
+        },
+      );
 
       Object.assign(user, {
         dataGroups: dataGroupUser,
         dataGroupIdsOrder,
         dataGroupIdsSupport,
+        dataGroupIdsOrderSupport,
       });
     }
 
