@@ -76,7 +76,7 @@ export class ProductsService {
     );
     if (nameCategoryIsExist) {
       throw new ApiException(
-        'Category name already exists',
+        'Tên danh mục đã tồn tại',
         HttpStatus.BAD_REQUEST,
         ErrorCode.INVALID_INPUT,
       );
@@ -136,7 +136,7 @@ export class ProductsService {
 
     if (!isExist) {
       throw new ApiException(
-        'Category not existing',
+        'Danh mục sản phẩm không tồn tại',
         HttpStatus.BAD_REQUEST,
         ErrorCode.INVALID_INPUT,
       );
@@ -147,7 +147,7 @@ export class ProductsService {
     });
     if (nameProductIsExist) {
       throw new ApiException(
-        'Product name already exists',
+        'Tên sản phẩm đã tồn tại',
         HttpStatus.BAD_REQUEST,
         ErrorCode.INVALID_INPUT,
       );
@@ -250,7 +250,7 @@ export class ProductsService {
 
     if (!productCategory) {
       throw new ApiException(
-        'Product category not found',
+        'Danh mục sản phẩm không tồn tại',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
@@ -273,7 +273,7 @@ export class ProductsService {
       );
       if (nameCategoryIsExist) {
         throw new ApiException(
-          'Category name already exists',
+          'Tên danh mục sản phẩm đã tồn tại',
           HttpStatus.BAD_REQUEST,
           ErrorCode.INVALID_INPUT,
         );
@@ -293,7 +293,7 @@ export class ProductsService {
 
     if (!product) {
       throw new ApiException(
-        'Product not found',
+        'Sản phẩm không tồn tại',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
@@ -316,7 +316,7 @@ export class ProductsService {
       );
       if (nameProductIsExist) {
         throw new ApiException(
-          'Product name already exists',
+          'Tên sản phẩm đã tồn tại',
           HttpStatus.BAD_REQUEST,
           ErrorCode.INVALID_INPUT,
         );

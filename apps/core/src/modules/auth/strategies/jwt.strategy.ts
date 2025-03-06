@@ -146,7 +146,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
 
     if (user.isBan) {
-      throw new ApiException('User is banned', HttpStatus.FORBIDDEN);
+      throw new ApiException('Người dùng đang bị ban', HttpStatus.FORBIDDEN);
     }
 
     return omit(user, ['UserPermissionGroup']);

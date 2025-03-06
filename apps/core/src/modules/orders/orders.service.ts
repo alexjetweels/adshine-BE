@@ -38,7 +38,7 @@ export class OrdersService {
 
     if (products.length !== productIds.length) {
       throw new ApiException(
-        'Product not found',
+        'Sản phẩm không tồn tại hoặc đã bị xóa',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
@@ -48,7 +48,7 @@ export class OrdersService {
   checkPermissionInGroup(groupId: string, user: AuthUser) {
     if (!user?.dataGroups?.[groupId]) {
       throw new ApiException(
-        'User not not in group',
+        'Người dùng không thuộc group này',
         HttpStatus.FORBIDDEN,
         ErrorCode.FORBIDDEN,
       );

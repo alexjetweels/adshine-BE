@@ -1,13 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { OrderState } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEnum, IsNotEmpty } from 'class-validator';
 
 export class UpdateOrderStateDto {
   @ApiProperty({
     description: 'Update order state',
     example: OrderState.PRODUCT_DELIVERED,
     required: true,
-    enum: OrderState,
+    enum: [
+      OrderState.CANCELED,
+      OrderState.PRODUCT_DELIVERED,
+      OrderState.COMPLETED,
+    ],
     enumName: 'OrderState',
   })
   @IsNotEmpty()

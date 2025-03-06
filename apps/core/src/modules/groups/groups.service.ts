@@ -74,7 +74,7 @@ export class GroupsService {
 
     if (countUsers !== managerIds.length) {
       throw new ApiException(
-        'User manager not found in database',
+        'Quản lý không tồn tại trong hệ thống',
         HttpStatus.BAD_GATEWAY,
         ErrorCode.INVALID_INPUT,
       );
@@ -94,7 +94,7 @@ export class GroupsService {
 
       if (countGroups !== groupIdsSupport.length) {
         throw new ApiException(
-          'Group order support not found in database',
+          'Nhóm order support không tồn tại trong hệ thống',
           HttpStatus.BAD_GATEWAY,
           ErrorCode.INVALID_INPUT,
         );
@@ -331,7 +331,7 @@ export class GroupsService {
 
     if (!group) {
       throw new ApiException(
-        'Group not found',
+        'Không tìm thấy nhóm',
         HttpStatus.NOT_FOUND,
         ErrorCode.NOT_FOUND,
       );
@@ -339,7 +339,7 @@ export class GroupsService {
 
     if (group.status === StatusGroup.INACTIVE) {
       throw new ApiException(
-        'Group is inactive',
+        'Nhóm đã bị xóa',
         HttpStatus.BAD_GATEWAY,
         ErrorCode.INVALID_INPUT,
       );
@@ -369,7 +369,7 @@ export class GroupsService {
     if (managerIds && !isPermissionUpdate) {
       if (!managerIdsActiveCurrent.includes(user.id)) {
         throw new ApiException(
-          'You do not have permission to update this group',
+          'Bạn không có quyền cập nhật nhóm',
           HttpStatus.FORBIDDEN,
           ErrorCode.FORBIDDEN,
         );
@@ -377,7 +377,7 @@ export class GroupsService {
     } else {
       if (!managerIds?.length) {
         throw new ApiException(
-          'ManagerIds is required',
+          'Quản lý không được để trống',
           HttpStatus.BAD_GATEWAY,
           ErrorCode.INVALID_INPUT,
         );
@@ -429,7 +429,7 @@ export class GroupsService {
 
       if (countGroups !== groupIdsSupportUpdate.length) {
         throw new ApiException(
-          'Group order support not found in database',
+          'Nhóm order support không tồn tại trong hệ thống',
           HttpStatus.BAD_GATEWAY,
           ErrorCode.INVALID_INPUT,
         );
@@ -442,7 +442,7 @@ export class GroupsService {
 
       if (setGroup.length !== groupIdsSupportUpdate?.length) {
         throw new ApiException(
-          'Group order support is not group order support',
+          'Nhóm order support không tồn tại trong hệ thống',
           HttpStatus.BAD_GATEWAY,
           ErrorCode.INVALID_INPUT,
         );
@@ -456,7 +456,7 @@ export class GroupsService {
       console.log({ leaderIdsGroup, setLeaderIds, leaderIds: leaderIdsGroup });
       if (leaderIdsGroup.length !== setLeaderIds.length) {
         throw new ApiException(
-          'Leader staff is not leader group',
+          'Quản lý nhân viên không nằm trong danh sách quản lý nhóm',
           HttpStatus.BAD_GATEWAY,
           ErrorCode.INVALID_INPUT,
         );
@@ -472,7 +472,7 @@ export class GroupsService {
 
       if (Array.from(new Set(userIdsMerge)).length !== userIdsMerge.length) {
         throw new ApiException(
-          'Duplicate user id in managerIds and leaderIds and staff',
+          'Tồn tại user trùng lặp',
           HttpStatus.BAD_GATEWAY,
           ErrorCode.INVALID_INPUT,
         );
@@ -482,7 +482,7 @@ export class GroupsService {
 
       if (countUsers !== userIdsMerge.length) {
         throw new ApiException(
-          'User not found in database',
+          'Người dùng không tồn tại trong hệ thống',
           HttpStatus.BAD_GATEWAY,
           ErrorCode.INVALID_INPUT,
         );

@@ -98,7 +98,7 @@ export class NotificationsService {
 
     if (!notification) {
       throw new ApiException(
-        'Notification not found',
+        'Thông báo không tồn tại',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
