@@ -30,7 +30,7 @@ export class AuthService {
 
     if (existingUser) {
       throw new ApiException(
-        'User existing',
+        'Email người dùng đã tồn tại',
         HttpStatus.BAD_REQUEST,
         ErrorCode.INVALID_INPUT,
       );
@@ -55,7 +55,7 @@ export class AuthService {
 
     if (!user) {
       throw new ApiException(
-        'User not found',
+        'Không tìm thấy người dùng',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
@@ -65,14 +65,14 @@ export class AuthService {
 
     if (!isMathPassword) {
       throw new ApiException(
-        'Email or password not matching',
+        'Email hoặc mật khẩu không đúng',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
     }
 
     if (user.isBan) {
-      throw new ApiException('User is banned', HttpStatus.FORBIDDEN);
+      throw new ApiException('Người dùng đang bị ban', HttpStatus.FORBIDDEN);
     }
 
     return this.tokenService.signToken(user);
@@ -89,7 +89,7 @@ export class AuthService {
 
     if (!isMathPassword) {
       throw new ApiException(
-        'Old password not matching',
+        'Mật khẩu cũ không đúng',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );

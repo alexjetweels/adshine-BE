@@ -52,7 +52,7 @@ export class UserService {
 
     if (!user) {
       throw new ApiException(
-        'User not found',
+        'Người dùng không tồn tại',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
@@ -175,7 +175,7 @@ export class UserService {
 
     if (existingUser) {
       throw new ApiException(
-        'User existing',
+        'Nguời dùng đã tồn tại',
         HttpStatus.BAD_REQUEST,
         ErrorCode.INVALID_INPUT,
       );
@@ -205,7 +205,7 @@ export class UserService {
 
         if (permissionGroups !== permissionGroupIds.length) {
           throw new ApiException(
-            'Permission group not found',
+            'Nhóm quyền không tồn tại',
             HttpStatus.BAD_REQUEST,
             ErrorCode.INVALID_INPUT,
           );
@@ -237,7 +237,7 @@ export class UserService {
 
     if (!existingUser) {
       throw new ApiException(
-        'User not found',
+        'Người dùng không tồn tại',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
@@ -262,7 +262,7 @@ export class UserService {
 
       if (existingUserEmail) {
         throw new ApiException(
-          'Email existing',
+          'Email đã tồn tại',
           HttpStatus.BAD_REQUEST,
           ErrorCode.INVALID_INPUT,
         );
@@ -295,7 +295,7 @@ export class UserService {
 
         if (permissionGroups !== permissionGroupIds.length) {
           throw new ApiException(
-            'Permission group not found',
+            'Nhóm quyền không tồn tại',
             HttpStatus.BAD_REQUEST,
             ErrorCode.INVALID_INPUT,
           );

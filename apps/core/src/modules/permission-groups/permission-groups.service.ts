@@ -44,7 +44,7 @@ export class PermissionGroupsService {
     const existingPermissionGroup = await this.findByName(permissionGroup.name);
     if (existingPermissionGroup) {
       throw new ApiException(
-        'Name permission group already exists',
+        'Tên nhóm quyền đã tồn tại',
         HttpStatus.BAD_GATEWAY,
         ErrorCode.INVALID_INPUT,
       );
@@ -158,7 +158,7 @@ export class PermissionGroupsService {
 
     if (!permissionGroup) {
       throw new ApiException(
-        'Permission group not found',
+        'Quyền không tồn tại',
         HttpStatus.NOT_FOUND,
         ErrorCode.INVALID_INPUT,
       );
@@ -172,7 +172,7 @@ export class PermissionGroupsService {
       });
       if (existingPermissionGroup && existingPermissionGroup.id !== id) {
         throw new ApiException(
-          'Name permission group already exists',
+          'Tên nhóm quyền đã tồn tại',
           HttpStatus.BAD_GATEWAY,
           ErrorCode.INVALID_INPUT,
         );
