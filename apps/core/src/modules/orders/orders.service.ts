@@ -97,6 +97,14 @@ export class OrdersService {
 
     const where = {} as Prisma.OrderWhereInput;
 
+    if (query.isMyOrder) {
+      where.userId = user.id;
+    }
+
+    if (query.userId) {
+      where.userId = query.userId;
+    }
+
     if (query.groupId) {
       where.groupId = query.groupId;
     }

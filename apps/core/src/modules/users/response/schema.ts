@@ -251,3 +251,45 @@ export const responseDetailUserSuccess: ApiResponseOptions = {
     },
   },
 };
+
+export const responseStatisticsUserSuccess: ApiResponseOptions = {
+  status: HttpStatus.OK,
+  description: 'Response example',
+  schema: {
+    example: {
+      data: {
+        id: 21,
+        name: 'user15',
+        email: 'user15@gmail.com',
+        _count: {
+          Order: 4,
+        },
+        orderStateCount: {
+          CANCELED: {
+            count: 1,
+            totalPrice: 2000000,
+          },
+          COMPLETED: {
+            count: 1,
+            totalPrice: 60000000,
+          },
+        },
+        categoryStatistics: {
+          FACEBOOK: {
+            CANCELED: {
+              totalQuantity: 10,
+              totalPrice: 2000000,
+            },
+            COMPLETED: {
+              totalQuantity: 120,
+              totalPrice: 60000000,
+            },
+          },
+        },
+      },
+      timestamp: '07/03/2025 23:16:21',
+      path: '/api/core/v1/users/21/stats?startTime=2025-03-06%2015:06:50.737&endTime=2025-03-07%2015:42:15.490',
+      traceId: '362fed58-32c9-44b0-b75d-5da54d1d5a9f',
+    },
+  },
+};
