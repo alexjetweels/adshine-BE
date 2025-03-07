@@ -75,7 +75,7 @@ export class UserController {
     return this.userService.findOne(userId);
   }
 
-  @AuthV2([PERMISSION_KEYS.USER_VIEW])
+  // @AuthV2([PERMISSION_KEYS.USER_VIEW])
   @AuthV2()
   @Get('/:userId/stats')
   @ApiResponseCustom([responseStatisticsUserSuccess])

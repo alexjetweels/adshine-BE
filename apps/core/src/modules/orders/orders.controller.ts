@@ -18,9 +18,11 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrdersService } from './orders.service';
 import {
   responseCreateOrderSuccess,
+  responseHistoryOrderSuccess,
   responseListOrderSuccess,
 } from './response/schema';
 import { UpdateOrderStateDto } from './dto/update-order-state';
+import { HistoryOrderDto } from './dto/history-order.dto';
 
 @CoreControllers({
   path: 'orders',
@@ -60,5 +62,13 @@ export class OrdersController {
   @HttpCode(HttpStatus.OK)
   updateState(@Param('id') id: number, @Body() body: UpdateOrderStateDto) {
     return this.ordersService.updateState(id, body);
+  }
+
+  @AuthV2()
+  @Get('history')
+  @ApiResponseCustom([responseHistoryOrderSuccess])
+  @HttpCode(HttpStatus.OK)
+  async getHistoryOrder(@Query() query: HistoryOrderDto) {
+    return this.ordersService.getHistoryOrder(query);
   }
 }

@@ -21,6 +21,7 @@ import { ListOrderDto } from './dto/list-order.dto';
 import { UpdateOrderStateDto } from './dto/update-order-state';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
+import { HistoryOrderDto } from './dto/history-order.dto';
 
 @Injectable()
 export class OrdersService {
@@ -371,6 +372,79 @@ export class OrdersService {
       });
 
       return body;
+    });
+  }
+
+  async getHistoryOrder(query: HistoryOrderDto) {
+    const user = ContextProvider.getAuthUser<AuthUser>();
+
+    const where = {} as Prisma.OrderHistoryWhereInput;
+
+    if (query.orderIds) {
+      where.orderId = {
+        in: query.orderIds,
+      };
+    }
+
+    if (query.state) {
+      where.action = query.state;
+    }
+
+    if (user.role !== Role.ADMIN) {
+      // query in orders
+      where.order = {
+        groupId: {
+          in: [
+            ...(user.dataGroupIdsOrder || []),
+            ...(user.dataGroupIdsOrderSupport || []),
+          ],
+        },
+      };
+    }
+
+    const records = await this.prismaService.orderHistory.findMany({
+      where,
+      include: {
+        order: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        id: 'desc',
+      },
+      take: query.limit,
+      skip: (query.page - 1) * query.limit,
+    });
+
+    const total = await this.prismaService.orderHistory.count({ where });
+
+    const orders = map(records, (record) => {
+      return {
+        ...record,
+      };
+    });
+
+    return schemaPaging({
+      data: orders,
+      page: query.page,
+      limit: query.limit,
+      totalPage: Math.ceil(total / query.limit),
+      totalItems: total,
     });
   }
 }
