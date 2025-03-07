@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { Role, User } from '@prisma/client';
+import { Role, StatusOrder, User } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ErrorCode } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
@@ -12,6 +12,7 @@ import { map, omit } from 'lodash';
 import { CoreCreateUserDto } from './dto/create-user.dto';
 import { ListUserDto } from './dto/list-user.dto';
 import { CoreUpdateUserDto } from './dto/update-user.dto';
+import { UserStatsDto } from './dto/user-stats.dto';
 
 @Injectable()
 export class UserService {
@@ -318,5 +319,114 @@ export class UserService {
 
       return { ...user, password: newPassword };
     });
+  }
+
+  async getStatisticsUser(userId: number, query: UserStatsDto) {
+    const userStatistics = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        _count: {
+          select: {
+            Order: true,
+          },
+        },
+        Order: {
+          where: {
+            status: StatusOrder.ACTIVE,
+            createdAt: {
+              gte: query.startTime,
+              lte: query.endTime,
+            },
+          },
+          select: {
+            totalPrice: true,
+            state: true,
+            orderItems: {
+              select: {
+                quantity: true,
+                price: true,
+                product: {
+                  select: {
+                    category: {
+                      select: {
+                        name: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!userStatistics) {
+      throw new ApiException('Người dùng không tồn tại', HttpStatus.NOT_FOUND);
+    }
+
+    const orderStateCount = userStatistics?.Order?.reduce(
+      (acc, order) => {
+        if (!acc[order.state]) {
+          acc[order.state] = {
+            count: 0,
+            totalPrice: BigInt(0),
+          };
+        }
+
+        acc[order.state].count += 1;
+        acc[order.state].totalPrice += order.totalPrice;
+        return acc;
+      },
+      {} as Record<
+        string,
+        {
+          count: number;
+          totalPrice: bigint;
+        }
+      >,
+    );
+
+    const categoryStatistics = userStatistics.Order?.flatMap((order) =>
+      order.orderItems.map((item) => ({
+        state: order.state,
+        category: item.product.category.name,
+        quantity: item.quantity,
+        price: BigInt(item.price) * BigInt(item.quantity),
+      })),
+    ).reduce(
+      (acc, item) => {
+        const { category, state, quantity, price } = item;
+
+        if (!acc[category]) {
+          acc[category] = {};
+        }
+
+        if (!acc[category][state]) {
+          acc[category][state] = {
+            totalQuantity: 0,
+            totalPrice: BigInt(0),
+          };
+        }
+
+        acc[category][state].totalQuantity += quantity;
+        acc[category][state].totalPrice += price;
+
+        return acc;
+      },
+      {} as Record<
+        string,
+        Record<string, { totalQuantity: number; totalPrice: bigint }>
+      >,
+    );
+
+    return {
+      ...omit(userStatistics, ['Order']),
+      orderStateCount,
+      categoryStatistics,
+    };
   }
 }

@@ -18,9 +18,11 @@ import {
   responseCreateUserSuccess,
   responseGetListUserSuccess,
   responseMeSuccess,
+  responseStatisticsUserSuccess,
   responseUpdateUserSuccess,
 } from './response/schema';
 import { UserService } from './user.service';
+import { UserStatsDto } from './dto/user-stats.dto';
 
 @CoreControllers({
   path: 'users',
@@ -71,5 +73,17 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async findOne(@Param('userId') userId: number) {
     return this.userService.findOne(userId);
+  }
+
+  @AuthV2([PERMISSION_KEYS.USER_VIEW])
+  @AuthV2()
+  @Get('/:userId/stats')
+  @ApiResponseCustom([responseStatisticsUserSuccess])
+  @HttpCode(HttpStatus.OK)
+  async getStatisticsUser(
+    @Param('userId') userId: number,
+    @Query() query: UserStatsDto,
+  ) {
+    return this.userService.getStatisticsUser(userId, query);
   }
 }

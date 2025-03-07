@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { StatusOrder } from '@prisma/client';
-import { IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import { BaseQueryDto } from 'libs/utils/dto/base-query.dto';
 
 export class ListOrderDto extends BaseQueryDto {
@@ -23,4 +31,25 @@ export class ListOrderDto extends BaseQueryDto {
   @IsOptional()
   @IsUUID('4')
   groupId?: string;
+
+  @ApiProperty({
+    description: 'My order created',
+    example: false,
+    required: false,
+  })
+  @Transform(({ value }) => value === 'true')
+  @IsOptional()
+  @IsBoolean()
+  isMyOrder?: boolean;
+
+  @ApiProperty({
+    description: 'Search by user',
+    example: 1,
+    required: false,
+  })
+  @Transform(({ value }) => Number(value))
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  userId?: number;
 }
