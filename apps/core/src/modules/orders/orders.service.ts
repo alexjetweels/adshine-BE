@@ -414,6 +414,12 @@ export class OrdersService {
                 name: true,
               },
             },
+            group: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
           },
         },
         user: {
