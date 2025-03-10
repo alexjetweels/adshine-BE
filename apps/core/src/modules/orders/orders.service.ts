@@ -495,7 +495,7 @@ export class OrdersService {
     const records = await this.prismaService.order.findMany({
       where,
       orderBy: {
-        id: 'desc',
+        id: 'asc',
       },
     });
 
