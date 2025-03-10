@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { GroupRole, GroupType, Role } from '@prisma/client';
+import { GroupRole, GroupType, Role, StatusGroup } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { TokenType } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
@@ -69,7 +69,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       Object.assign(user, { permissions: permissionsUser });
 
       const userGroup = await this.prismaService.userGroup.findMany({
-        where: { userId: args.userId },
+        where: { userId: args.userId, group: { status: StatusGroup.ACTIVE } },
         select: {
           groupId: true,
           role: true,

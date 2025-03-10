@@ -1,29 +1,28 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
   Delete,
+  Get,
   HttpCode,
   HttpStatus,
-  Query,
+  Param,
+  Patch,
+  Post,
+  Query
 } from '@nestjs/common';
-import { GroupsService } from './groups.service';
-import { CreateGroupDto } from './dto/create-group.dto';
-import { UpdateGroupDto } from './dto/update-group.dto';
-import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
-import { AuthV2, UUIDField } from 'libs/utils';
 import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
+import { AuthV2 } from 'libs/utils';
+import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
 import { ApiResponseCustom } from 'libs/utils/decorators/response-customer.decorator';
+import { CreateGroupDto } from './dto/create-group.dto';
+import { ListGroupDto } from './dto/list-group.dto';
+import { UpdateGroupDto } from './dto/update-group.dto';
+import { GroupsService } from './groups.service';
 import {
   responseCreateGroupSuccess,
   responseDetailGroupSuccess,
   responseListGroupSuccess,
   responseUpdateGroupSuccess,
 } from './response/schema';
-import { ListGroupDto } from './dto/list-group.dto';
 
 @CoreControllers({
   path: 'groups',
@@ -65,8 +64,10 @@ export class GroupsController {
     return this.groupsService.update(id, updateGroupDto);
   }
 
-  // @Delete(':id')
-  // remove(@Param('id') id: string) {
-  //   return this.groupsService.remove(+id);
-  // }
+  @AuthV2([PERMISSION_KEYS.GROUP_DELETE])
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  remove(@Param('id') id: string) {
+    return this.groupsService.remove(id);
+  }
 }
