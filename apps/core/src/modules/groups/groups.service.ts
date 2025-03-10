@@ -44,7 +44,9 @@ export class GroupsService {
       SELECT u.id AS userId, 
              EXISTS (
                  SELECT 1 FROM user_groups ug 
+                 INNER JOIN groups g ON ug."groupId" = g.id
                  WHERE ug."userId" = u.id 
+                 AND g."status" = 'ACTIVE'
                  ${optional?.excludeGroupId ? Prisma.sql`AND ug."groupId" != ${optional.excludeGroupId}` : Prisma.empty}
                  LIMIT 1
              ) AS "isGroup"
@@ -416,7 +418,7 @@ export class GroupsService {
         groupIdsSupportStaff: [] as string[],
       },
     );
-    console.log({ leaderStaff });
+
     if (groupIdsSupportUpdate?.length) {
       const countGroups = await this.prismaService.group.count({
         where: {
@@ -453,7 +455,7 @@ export class GroupsService {
       const setLeaderIds = Array.from(
         new Set([...leaderIdsGroup, ...leaderStaff]),
       );
-      console.log({ leaderIdsGroup, setLeaderIds, leaderIds: leaderIdsGroup });
+
       if (leaderIdsGroup.length !== setLeaderIds.length) {
         throw new ApiException(
           'Quản lý nhân viên không nằm trong danh sách quản lý nhóm',
@@ -602,7 +604,28 @@ export class GroupsService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} group`;
+  async remove(id: string) {
+    const group = await this.prismaService.group.findFirst({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!group || group.status === StatusGroup.INACTIVE) {
+      throw new ApiException(
+        'Không tìm thấy nhóm hoặc nhóm đã bị xóa',
+        HttpStatus.NOT_FOUND,
+        ErrorCode.NOT_FOUND,
+      );
+    }
+
+    return await this.prismaService.group.update({
+      where: {
+        id: id,
+      },
+      data: {
+        status: StatusGroup.INACTIVE,
+      },
+    });
   }
 }
