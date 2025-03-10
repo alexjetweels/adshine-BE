@@ -12,7 +12,7 @@ export class ListGroupDto extends BaseQueryDto {
   })
   @IsOptional()
   @IsEnum(StatusGroup)
-  status?: StatusGroup;
+  status?: StatusGroup = StatusGroup.ACTIVE;
 
   @ApiProperty({
     description: 'Group type',

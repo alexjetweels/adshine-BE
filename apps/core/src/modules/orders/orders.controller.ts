@@ -23,6 +23,7 @@ import {
 } from './response/schema';
 import { UpdateOrderStateDto } from './dto/update-order-state';
 import { HistoryOrderDto } from './dto/history-order.dto';
+import { StatsOrderDto } from './dto/stats-order.dto';
 
 @CoreControllers({
   path: 'orders',
@@ -70,5 +71,13 @@ export class OrdersController {
   @HttpCode(HttpStatus.OK)
   async getHistoryOrder(@Query() query: HistoryOrderDto) {
     return this.ordersService.getHistoryOrder(query);
+  }
+
+  @AuthV2()
+  @Get('stats')
+  @ApiResponseCustom([responseHistoryOrderSuccess])
+  @HttpCode(HttpStatus.OK)
+  async getStatsOrders(@Query() query: StatsOrderDto) {
+    return this.ordersService.getStatsOrders(query);
   }
 }

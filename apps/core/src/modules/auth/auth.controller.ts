@@ -1,4 +1,4 @@
-import { Body, HttpCode, HttpStatus, Patch, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Patch, Post, Sse } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { AuthRefreshToken, AuthV2 } from 'libs/utils';
 import { CoreControllers } from 'libs/utils/decorators/controller-customer.decorator';
@@ -9,9 +9,10 @@ import { CoreUserChangePasswordDto } from './dto/change-password.dto';
 import { CoreUserLoginDto } from './dto/login.dto';
 import {
   responseLoginSuccess,
-  responseRefreshTokenSuccess
+  responseRefreshTokenSuccess,
 } from './response/schema';
 import { AuthService } from './services/auth.service';
+import { interval, map, Observable, Subject } from 'rxjs';
 
 @CoreControllers({
   path: 'auth',
@@ -37,7 +38,7 @@ export class AuthController {
 
     return this.authService.generateNewToken(user, true);
   }
-
+  notificationEvent: Subject<any> = new Subject();
   @AuthV2()
   @ApiResponseCustom([responseSuccessBasic])
   @Patch('change-password')
@@ -45,4 +46,10 @@ export class AuthController {
   async changePassword(@Body() body: CoreUserChangePasswordDto) {
     return this.authService.changePassword(body);
   }
+
+  // @AuthV2()
+  // @Sse('sse')
+  // sse(): Observable<any> {
+  //   return interval(1000).pipe(map((_) => ({ data: { hello: 'world' } })));
+  // }
 }

@@ -1,12 +1,13 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import {
+  GroupRole,
+  Order,
+  OrderState,
   Prisma,
   Role,
   StatusOrder,
-  User,
-  OrderState,
-  Order,
 } from '@prisma/client';
+import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ErrorCode } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
@@ -17,11 +18,12 @@ import {
 import { schemaPaging } from 'libs/utils/util';
 import { map } from 'lodash';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { HistoryOrderDto } from './dto/history-order.dto';
 import { ListOrderDto } from './dto/list-order.dto';
+import { StatsOrderDto } from './dto/stats-order.dto';
 import { UpdateOrderStateDto } from './dto/update-order-state';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
-import { HistoryOrderDto } from './dto/history-order.dto';
+import moment from 'moment';
 
 @Injectable()
 export class OrdersService {
@@ -452,5 +454,93 @@ export class OrdersService {
       totalPage: Math.ceil(total / query.limit),
       totalItems: total,
     });
+  }
+
+  async getStatsOrders(query: StatsOrderDto) {
+    const user = ContextProvider.getAuthUser<AuthUser>();
+
+    const where = {} as Prisma.OrderWhereInput;
+
+    if (query.orderIds) {
+      where.id = {
+        in: query.orderIds,
+      };
+    }
+
+    if (query.startTime || query.endTime) {
+      where.createdAt = {};
+      if (query.startTime) {
+        where.createdAt['gte'] = query.startTime;
+      }
+      if (query.endTime) {
+        where.createdAt['lte'] = query.endTime;
+      }
+    }
+
+    if (query.state) {
+      where.state = query.state;
+    }
+
+    if (user.role !== Role.ADMIN) {
+      // query in orders
+      where.groupId = {
+        in: [
+          ...(user.dataGroupIdsOrder?.filter(
+            (id) => user.dataGroups?.[id]?.role === GroupRole.MANAGER,
+          ) || []),
+        ],
+      };
+    }
+
+    const records = await this.prismaService.order.findMany({
+      where,
+      orderBy: {
+        id: 'desc',
+      },
+    });
+
+    const allGroupIds: string[] = [];
+    const dataConvert = records.reduce(
+      (acc, cur) => {
+        if (!cur.groupId) return acc;
+        const date = moment(cur.createdAt)
+          .utcOffset(query.utcOffset)
+          .format('DD/MM/YYYY');
+
+        if (!acc[cur.groupId]) {
+          acc[cur.groupId] = {};
+          allGroupIds.push(cur.groupId);
+        }
+
+        if (!acc[cur.groupId][date]) {
+          acc[cur.groupId][date] = { total: BigInt(0), count: 0 };
+        }
+
+        // Add the item to the respective groupId and date
+        acc[cur.groupId][date].total += cur.totalPrice;
+        acc[cur.groupId][date].count += 1;
+
+        return acc;
+      },
+      {} as Record<string, Record<string, any>>,
+    );
+
+    const dataGroup = await this.prismaService.group.findMany({
+      where: {
+        id: {
+          in: allGroupIds,
+        },
+      },
+    });
+
+    // map name group to dataConvert
+    dataGroup.forEach((group) => {
+      const groupData = dataConvert[group.id];
+      if (groupData) {
+        groupData.name = group.name;
+      }
+    });
+
+    return dataConvert;
   }
 }
