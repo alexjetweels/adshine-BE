@@ -20,6 +20,7 @@ import {
   responseCreateOrderSuccess,
   responseHistoryOrderSuccess,
   responseListOrderSuccess,
+  responseStatsOrderSuccess,
 } from './response/schema';
 import { UpdateOrderStateDto } from './dto/update-order-state';
 import { HistoryOrderDto } from './dto/history-order.dto';
@@ -75,7 +76,7 @@ export class OrdersController {
 
   @AuthV2()
   @Get('stats')
-  @ApiResponseCustom([responseHistoryOrderSuccess])
+  @ApiResponseCustom([responseStatsOrderSuccess])
   @HttpCode(HttpStatus.OK)
   async getStatsOrders(@Query() query: StatsOrderDto) {
     return this.ordersService.getStatsOrders(query);

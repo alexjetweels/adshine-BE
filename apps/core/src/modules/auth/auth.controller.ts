@@ -47,9 +47,23 @@ export class AuthController {
     return this.authService.changePassword(body);
   }
 
-  // @AuthV2()
-  // @Sse('sse')
-  // sse(): Observable<any> {
-  //   return interval(1000).pipe(map((_) => ({ data: { hello: 'world' } })));
-  // }
+  @AuthV2()
+  @Sse('sse')
+  sse(): Observable<any> {
+    return new Observable((observer) => {
+      const subscription = interval(1000)
+        .pipe(
+          map((_) => ({
+            data: { hello: `world ${new Date().toISOString()}` },
+          })),
+        )
+        .subscribe(observer);
+
+      setTimeout(() => {
+        observer.complete(); // Đóng SSE sau 60s
+      }, 60000);
+
+      return () => subscription.unsubscribe();
+    });
+  }
 }
