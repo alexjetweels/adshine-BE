@@ -368,3 +368,35 @@ export const responseHistoryOrderSuccess: ApiResponseOptions = {
     },
   },
 };
+
+export const responseStatsOrderSuccess: ApiResponseOptions = {
+  status: HttpStatus.CREATED,
+  description: 'Response example',
+  schema: {
+    example: {
+      data: {
+        '2950b4bc-4b68-4cde-82a4-950a941bf885': {
+          '09/03/2025': {
+            total: 2000000,
+            count: 1,
+          },
+          name: 'Nhóm sản phẩm 002xx',
+        },
+        'e44b1a2a-7671-4d6a-80a6-4c5a976f7765': {
+          '06/02/2025': {
+            total: 60000000,
+            count: 1,
+          },
+          '05/03/2025': {
+            total: 41000,
+            count: 1,
+          },
+          name: 'Nhóm sản phẩm 001',
+        },
+      },
+      timestamp: '10/03/2025 20:27:35',
+      path: '/api/core/v1/orders/stats?startTime=2025-02-04T08:43:04.950Z&endTime=2025-04-04T08:43:04.950Z',
+      traceId: 'a6cf929f-6c2e-42af-83af-9bee219f5f4c',
+    },
+  },
+};
