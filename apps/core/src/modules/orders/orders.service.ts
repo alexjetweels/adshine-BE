@@ -113,13 +113,38 @@ export class OrdersService {
     }
 
     if (user.role !== Role.ADMIN) {
-      // query in orders
-      where.groupId = {
-        in: [
-          ...(user.dataGroupIdsOrder || []),
-          ...(user.dataGroupIdsOrderSupport || []),
-        ],
-      };
+      if (user.dataGroupIdsOrder?.length) {
+        const managerGroupIds = [];
+        let isStaff = false;
+
+        for (const [groupId, groupData] of Object.entries(
+          user.dataGroups || {},
+        )) {
+          if (groupData.role === GroupRole.MANAGER) {
+            managerGroupIds.push(groupId);
+          } else if (groupData.role === GroupRole.STAFF) {
+            isStaff = true;
+          }
+        }
+
+        if (managerGroupIds.length > 0) {
+          where.groupId = { in: managerGroupIds };
+        } else if (isStaff) {
+          where.userId = user.id;
+        }
+      } else if (user.dataGroupIdsOrderSupport?.length) {
+        where.groupId = {
+          in: user.dataGroupIdsOrderSupport || [],
+        };
+      } else {
+        return schemaPaging({
+          data: [],
+          page: query.page,
+          limit: query.limit,
+          totalPage: Math.ceil(0 / query.limit),
+          totalItems: 0,
+        });
+      }
     }
 
     if (query.startTime || query.endTime) {
@@ -134,6 +159,24 @@ export class OrdersService {
 
     if (query.status) {
       where.status = query.status;
+    }
+
+    if (query.productId) {
+      where.orderItems = {
+        some: {
+          productId: query.productId,
+        },
+      };
+    }
+
+    if (query.categoryId) {
+      where.orderItems = {
+        some: {
+          product: {
+            categoryId: query.categoryId,
+          },
+        },
+      };
     }
 
     const records = await this.prismaService.order.findMany({
@@ -482,14 +525,25 @@ export class OrdersService {
     }
 
     if (user.role !== Role.ADMIN) {
-      // query in orders
-      where.groupId = {
-        in: [
-          ...(user.dataGroupIdsOrder?.filter(
-            (id) => user.dataGroups?.[id]?.role === GroupRole.MANAGER,
-          ) || []),
-        ],
-      };
+      const managerGroupIds = [];
+      let isStaff = false;
+
+      for (const [groupId, groupData] of Object.entries(
+        user.dataGroups || {},
+      )) {
+        if (groupData.role === GroupRole.MANAGER) {
+          managerGroupIds.push(groupId);
+        } else if (groupData.role === GroupRole.STAFF) {
+          isStaff = true;
+        }
+      }
+      if (managerGroupIds.length > 0) {
+        // Nếu có group role MANAGER, tìm theo groupId
+        where.groupId = { in: managerGroupIds };
+      } else if (isStaff) {
+        // Nếu chỉ có role STAFF, tìm theo userId
+        where.userId = user.id;
+      }
     }
 
     const records = await this.prismaService.order.findMany({

@@ -52,4 +52,26 @@ export class ListOrderDto extends BaseQueryDto {
   @IsInt()
   @Min(1)
   userId?: number;
+
+  @ApiProperty({
+    description: 'Search by product',
+    example: 1,
+    required: false,
+  })
+  @Transform(({ value }) => Number(value))
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  productId: bigint;
+
+  @ApiProperty({
+    description: 'Search by category',
+    example: 1,
+    required: false,
+  })
+  @Transform(({ value }) => Number(value))
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  categoryId: bigint;
 }
