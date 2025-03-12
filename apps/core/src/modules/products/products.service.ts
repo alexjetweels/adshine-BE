@@ -188,6 +188,7 @@ export class ProductsService {
         status: true,
         createdAt: true,
         updatedAt: true,
+        description: true,
         category: {
           select: {
             id: true,
