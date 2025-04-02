@@ -161,6 +161,10 @@ export class OrdersService {
       where.status = query.status;
     }
 
+    if (query.state) {
+      where.state = query.state;
+    }
+
     if (query.productId) {
       where.orderItems = {
         some: {
@@ -188,6 +192,7 @@ export class OrdersService {
               select: {
                 category: true,
                 name: true,
+                description: true,
               },
             },
           },

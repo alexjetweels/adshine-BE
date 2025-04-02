@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { StatusOrder } from '@prisma/client';
+import { OrderState, StatusOrder } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,
@@ -74,4 +74,14 @@ export class ListOrderDto extends BaseQueryDto {
   @IsInt()
   @Min(1)
   categoryId: bigint;
+
+  @ApiProperty({
+    description: 'state order',
+    example: OrderState.COMPLETED,
+    enum: OrderState,
+    enumName: 'OrderState',
+  })
+  @IsOptional()
+  @IsEnum(OrderState)
+  state?: OrderState;
 }

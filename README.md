@@ -1,4 +1,5 @@
 # adshine-BE
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
@@ -73,20 +74,30 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 Nest is [MIT licensed](LICENSE).
 
-
 prisma migrate dev --name add_payload_cell_user
 npx prisma migrate dev --create-only --name add-check-constraint
 nest g res modules/nft
 
-
 ## Start
+
 add .env
 yarn
 prisma migrate dev
 yarn start:core:dev
 
-
 ## build with docker
+
 docker build -f ./apps/core/Dockerfile -t be-adshine .
 docker-compose down
 docker-compose up -d
+
+cd adshine-BE
+
+git pull
+docker build -f ./apps/core/Dockerfile -t be-adshine .
+
+cd ..
+
+docker compose down
+
+docker compose up -d
