@@ -5,26 +5,49 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { KeyPermissionDefaultType } from 'libs/modules/init-data/init';
+import {
+  KeyPermissionDefaultType,
+  PERMISSION_KEYS,
+} from 'libs/modules/init-data/init';
 import { isEmpty } from 'lodash';
 import { RoleType } from '../enum';
+import { PostType } from '@prisma/client';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const permissions = this.reflector.get<KeyPermissionDefaultType[]>(
-      'permissions',
-      context.getHandler(),
-    );
+    const originalPermissions =
+      this.reflector.get<KeyPermissionDefaultType[]>(
+        'permissions',
+        context.getHandler(),
+      ) || [];
+
+    const permissions = [...originalPermissions];
+
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    if (
+      request.url.includes('/api/core/v1/posts') &&
+      request.method === 'POST'
+    ) {
+      const keyPermission = {
+        [PostType.TIP]: PERMISSION_KEYS.POST_CREATE_TIP,
+        [PostType.SHARE]: PERMISSION_KEYS.POST_CREATE_SHARE,
+        [PostType.TRICK]: PERMISSION_KEYS.POST_CREATE_TRICK,
+      };
+
+      const extraPermission = keyPermission[request.body.type as PostType];
+      if (extraPermission) {
+        permissions.push(extraPermission);
+      }
+    }
 
     if (isEmpty(permissions)) {
       return true;
     }
-
-    const request = context.switchToHttp().getRequest();
-    const user = request.user;
 
     if (user.role === RoleType.ADMIN) {
       return true;
