@@ -1,7 +1,10 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { NotificationStatus, Prisma, Role, User } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
-import { ContextProvider } from 'libs/utils/providers/context.provider';
+import {
+  AuthUser,
+  ContextProvider,
+} from 'libs/utils/providers/context.provider';
 import { schemaPaging } from 'libs/utils/util';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { ListNotificationDto } from './dto/list-notifation.dto';
@@ -15,7 +18,7 @@ export class NotificationsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(createNotificationDto: CreateNotificationDto) {
-    const user = ContextProvider.getAuthUser<User>();
+    const user = ContextProvider.getAuthUser<AuthUser>();
 
     return this.prismaService.notification.create({
       data: {
@@ -26,7 +29,7 @@ export class NotificationsService {
   }
 
   async findAll(listNotificationDto: ListNotificationDto) {
-    const user = ContextProvider.getAuthUser<User>();
+    const user = ContextProvider.getAuthUser<AuthUser>();
 
     if (user.role !== Role.ADMIN) {
       listNotificationDto.status = NotificationStatus.SHOW;
