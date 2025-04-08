@@ -31,7 +31,7 @@ export class CreatePostDto {
 
   @ApiProperty({
     description: 'The type',
-    example: PostType.TIP,
+    example: PostType.TIP_TRICK,
     required: true,
     enum: PostType,
     enumName: 'PostType',
