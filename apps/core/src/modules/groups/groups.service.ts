@@ -226,17 +226,17 @@ export class GroupsService {
       };
     };
 
-    if (
-      user.role !== Role.ADMIN &&
-      !user.permissions?.includes(PERMISSION_KEYS.GROUP_VIEW)
-    ) {
-      where.users = {
-        some: {
-          userId: user.id,
-          status: StatusUserGroup.ACTIVE,
-        },
-      };
-    }
+    // if (
+    //   user.role !== Role.ADMIN &&
+    //   !user.permissions?.includes(PERMISSION_KEYS.GROUP_VIEW)
+    // ) {
+    //   where.users = {
+    //     some: {
+    //       userId: user.id,
+    //       status: StatusUserGroup.ACTIVE,
+    //     },
+    //   };
+    // }
 
     let select = {} as Prisma.GroupSelect;
 
