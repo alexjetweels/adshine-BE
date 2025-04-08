@@ -59,13 +59,13 @@ export const PERMISSION_DEFAULT = {
       'Chỉnh sửa trạng thái đơn hàng bao gồm xác nhận đã nhận hàng / hủy yêu cầu. (Trường hợp xác nhận đã giao hàng mặc định staff support order có quyền này)',
   },
   POST_UPDATE: {
-    description: 'Update bài post, xóa bài post',
+    description: 'Update tip trick, tài liệu, phần mềm tiện ích',
   },
   POST_CREATE_TIP_TRICK: {
     description: 'Tạo bài viết tip trick mới',
   },
   POST_CREATE_SOFTWARE: {
-    description: 'Chỉnh sửa bài viết phần mềm tiện ích',
+    description: 'Tạo bài viết phần mềm tiện ích mới',
   },
   POST_CREATE_DOCUMENT: {
     description: 'Tạo bài viết tài liệu mới',
