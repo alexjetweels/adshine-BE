@@ -341,9 +341,9 @@ model UserGroupSupport {
 }
 
 enum PostType {
-  TIP
-  TRICK
-  SHARE
+  TIP_TRICK
+  SOFTWARE
+  DOCUMENT
 }
 
 enum PostStatus {
@@ -355,7 +355,7 @@ model Post {
   id        String             @id @default(uuid())
   title     String?            @db.VarChar(255)
   content   String             @db.Text
-  type      PostType           @default(TIP)
+  type      PostType           @default(TIP_TRICK)
   status    PostStatus         @default(SHOW)
   iconType  String?            @db.VarChar(50)
   iconUrl   String?            @db.VarChar(255)

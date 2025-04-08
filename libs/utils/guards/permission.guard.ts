@@ -34,9 +34,9 @@ export class PermissionsGuard implements CanActivate {
       request.method === 'POST'
     ) {
       const keyPermission = {
-        [PostType.TIP]: PERMISSION_KEYS.POST_CREATE_TIP,
-        [PostType.SHARE]: PERMISSION_KEYS.POST_CREATE_SHARE,
-        [PostType.TRICK]: PERMISSION_KEYS.POST_CREATE_TRICK,
+        [PostType.TIP_TRICK]: PERMISSION_KEYS.POST_CREATE_TIP_TRICK,
+        [PostType.DOCUMENT]: PERMISSION_KEYS.POST_CREATE_DOCUMENT,
+        [PostType.SOFTWARE]: PERMISSION_KEYS.POST_CREATE_SOFTWARE,
       };
 
       const extraPermission = keyPermission[request.body.type as PostType];

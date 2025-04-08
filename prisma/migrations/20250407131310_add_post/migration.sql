@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "PostType" AS ENUM ('TIP', 'TRICK', 'SHARE');
+CREATE TYPE "PostType" AS ENUM ('TIP_TRICK', 'SOFTWARE', 'DOCUMENT');
 
 -- CreateEnum
 CREATE TYPE "PostStatus" AS ENUM ('HIDE', 'SHOW');
@@ -9,7 +9,7 @@ CREATE TABLE "posts" (
     "id" TEXT NOT NULL,
     "title" VARCHAR(255),
     "content" TEXT NOT NULL,
-    "type" "PostType" NOT NULL DEFAULT 'TIP',
+    "type" "PostType" NOT NULL DEFAULT 'TIP_TRICK',
     "status" "PostStatus" NOT NULL DEFAULT 'SHOW',
     "iconType" VARCHAR(50),
     "iconUrl" VARCHAR(255),
