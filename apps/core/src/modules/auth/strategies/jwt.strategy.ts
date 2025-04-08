@@ -20,6 +20,83 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
+  async getInfoGroupUser(userId: number) {
+    const userGroup = await this.prismaService.userGroup.findMany({
+      where: { userId: userId, group: { status: StatusGroup.ACTIVE } },
+      select: {
+        groupId: true,
+        role: true,
+        leaderId: true,
+        status: true,
+        group: {
+          select: {
+            name: true,
+            type: true,
+            supportOrderGroup: {
+              select: {
+                orderGroupId: true,
+              },
+            },
+          },
+        },
+        userGroupSupport: {
+          select: {
+            groupSupportId: true,
+          },
+        },
+      },
+    });
+
+    const {
+      dataGroupUser,
+      dataGroupIdsOrder,
+      dataGroupIdsSupport,
+      dataGroupIdsOrderSupport,
+    } = userGroup.reduce(
+      (acc, cur) => {
+        acc.dataGroupUser[cur.groupId] = {
+          role: cur.role,
+          leaderId: cur.leaderId,
+          group: cur.group,
+          userGroupSupport: cur.userGroupSupport.map(
+            (ugs) => ugs.groupSupportId,
+          ),
+        };
+        if (cur.group.type === GroupType.ORDER) {
+          acc.dataGroupIdsOrder.push(cur.groupId);
+        }
+
+        if (cur.group.type === GroupType.SUPPORT) {
+          acc.dataGroupIdsSupport.push(cur.groupId);
+          acc.dataGroupIdsOrderSupport.push(
+            ...(acc.dataGroupUser[cur.groupId]?.userGroupSupport || []),
+          );
+
+          if (cur.role === GroupRole.MANAGER) {
+            acc.dataGroupIdsOrderSupport.push(
+              ...(cur.group?.supportOrderGroup?.map(
+                (sog) => sog.orderGroupId,
+              ) || []),
+            );
+          }
+        }
+        return acc;
+      },
+      {
+        dataGroupUser: {} as Record<string, any>,
+        dataGroupIdsOrder: [] as string[],
+        dataGroupIdsSupport: [] as string[],
+        dataGroupIdsOrderSupport: [] as string[],
+      },
+    );
+
+    return {
+      dataGroupUser,
+      dataGroupIdsOrder,
+      dataGroupIdsSupport,
+      dataGroupIdsOrderSupport: Array.from(new Set(dataGroupIdsOrderSupport)),
+    };
+  }
   async validate(args: { userId: number; role: Role; type: TokenType }) {
     if (args.type !== TokenType.ACCESS_TOKEN) {
       throw new ApiException('Unauthorize', HttpStatus.UNAUTHORIZED);
@@ -68,80 +145,18 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       );
       Object.assign(user, { permissions: permissionsUser });
 
-      const userGroup = await this.prismaService.userGroup.findMany({
-        where: { userId: args.userId, group: { status: StatusGroup.ACTIVE } },
-        select: {
-          groupId: true,
-          role: true,
-          leaderId: true,
-          status: true,
-          group: {
-            select: {
-              name: true,
-              type: true,
-              supportOrderGroup: {
-                select: {
-                  orderGroupId: true,
-                },
-              },
-            },
-          },
-          userGroupSupport: {
-            select: {
-              groupSupportId: true,
-            },
-          },
-        },
-      });
-
       const {
         dataGroupUser,
         dataGroupIdsOrder,
         dataGroupIdsSupport,
         dataGroupIdsOrderSupport,
-      } = userGroup.reduce(
-        (acc, cur) => {
-          acc.dataGroupUser[cur.groupId] = {
-            role: cur.role,
-            leaderId: cur.leaderId,
-            group: cur.group,
-            userGroupSupport: cur.userGroupSupport.map(
-              (ugs) => ugs.groupSupportId,
-            ),
-          };
-          if (cur.group.type === GroupType.ORDER) {
-            acc.dataGroupIdsOrder.push(cur.groupId);
-          }
-
-          if (cur.group.type === GroupType.SUPPORT) {
-            acc.dataGroupIdsSupport.push(cur.groupId);
-            acc.dataGroupIdsOrderSupport.push(
-              ...(acc.dataGroupUser[cur.groupId]?.userGroupSupport || []),
-            );
-
-            if (cur.role === GroupRole.MANAGER) {
-              acc.dataGroupIdsOrderSupport.push(
-                ...(cur.group?.supportOrderGroup?.map(
-                  (sog) => sog.orderGroupId,
-                ) || []),
-              );
-            }
-          }
-          return acc;
-        },
-        {
-          dataGroupUser: {} as Record<string, any>,
-          dataGroupIdsOrder: [] as string[],
-          dataGroupIdsSupport: [] as string[],
-          dataGroupIdsOrderSupport: [] as string[],
-        },
-      );
+      } = await this.getInfoGroupUser(args.userId);
 
       Object.assign(user, {
         dataGroups: dataGroupUser,
         dataGroupIdsOrder,
         dataGroupIdsSupport,
-        dataGroupIdsOrderSupport: Array.from(new Set(dataGroupIdsOrderSupport)),
+        dataGroupIdsOrderSupport,
       });
     }
 

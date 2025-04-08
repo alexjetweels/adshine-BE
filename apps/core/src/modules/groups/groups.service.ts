@@ -157,11 +157,11 @@ export class GroupsService {
       user.role !== Role.ADMIN &&
       !user.permissions?.includes(PERMISSION_KEYS.GROUP_VIEW)
     ) {
-      where.users = {
-        some: {
-          userId: user.id,
-          status: StatusUserGroup.ACTIVE,
-        },
+      where.id = {
+        in: [
+          ...(user.dataGroupIdsOrder || []),
+          ...(user.dataGroupIdsSupport || []),
+        ],
       };
     }
 
@@ -171,6 +171,14 @@ export class GroupsService {
 
     if (listGroupDto.type) {
       where.type = listGroupDto.type;
+    }
+
+    if (listGroupDto.orderGroupId) {
+      where.supportOrderGroup = {
+        some: {
+          orderGroupId: listGroupDto.orderGroupId,
+        },
+      };
     }
 
     const records = await this.prismaService.group.findMany({
