@@ -182,7 +182,7 @@ export class UserService {
       );
     }
 
-    const password = randomPassword();
+    const password = 'Ad@123456';
     const hashedPassword = generateHash(password);
     const data = {
       email: body.email,
