@@ -24,10 +24,14 @@ import { StatsOrderDto } from './dto/stats-order.dto';
 import { UpdateOrderStateDto } from './dto/update-order-state';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import moment from 'moment';
+import { JwtStrategy } from '../auth/strategies/jwt.strategy';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly jwtStrategy: JwtStrategy,
+  ) {}
 
   async checkProductExist(productIds: bigint[]) {
     const products = await this.prismaService.product.findMany({
@@ -61,7 +65,7 @@ export class OrdersService {
   async create(body: CreateOrderDto) {
     const user = ContextProvider.getAuthUser<AuthUser>();
 
-    const { orderItems, ...order } = body;
+    const { orderItems, staffSupportId, ...order } = body;
 
     await this.checkProductExist(orderItems.map((item) => item.productId));
 
@@ -80,9 +84,24 @@ export class OrdersService {
         ErrorCode.INVALID_INPUT,
       );
     }
+
+    if (staffSupportId) {
+      const staffDataGroup =
+        await this.jwtStrategy.getInfoGroupUser(staffSupportId);
+
+      if (!staffDataGroup.dataGroupIdsOrderSupport?.includes(order.groupId)) {
+        throw new ApiException(
+          'Staff không thuộc nhóm hỗ trợ cho nhóm này',
+          HttpStatus.FORBIDDEN,
+          ErrorCode.FORBIDDEN,
+        );
+      }
+    }
+
     const newOrder = await this.prismaService.order.create({
       data: {
         ...order,
+        staffSupportId,
         userId: user.id,
         orderItems: {
           createMany: {
@@ -133,9 +152,20 @@ export class OrdersService {
           where.userId = user.id;
         }
       } else if (user.dataGroupIdsOrderSupport?.length) {
-        where.groupId = {
-          in: user.dataGroupIdsOrderSupport || [],
-        };
+        const managerGroupIds = Object.keys(user.dataGroups || {}).filter(
+          (id) => user?.dataGroups?.[id].role === GroupRole.MANAGER,
+        );
+
+        where.OR = [
+          {
+            groupId: {
+              in: managerGroupIds,
+            },
+          },
+          {
+            staffSupportId: user.id,
+          },
+        ];
       } else {
         return schemaPaging({
           data: [],
@@ -198,6 +228,13 @@ export class OrdersService {
           },
         },
         user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
+        },
+        staffSupport: {
           select: {
             id: true,
             email: true,

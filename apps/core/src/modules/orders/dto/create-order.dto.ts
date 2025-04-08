@@ -9,6 +9,7 @@ import {
   IsString,
   IsUUID,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -82,4 +83,15 @@ export class CreateOrderDto {
   @IsString()
   @MaxLength(1000)
   description?: string;
+
+  @ApiProperty({
+    description: 'User support id',
+    example: 1,
+    required: false,
+    type: Number,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  staffSupportId?: number;
 }

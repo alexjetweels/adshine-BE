@@ -35,6 +35,7 @@ model User {
   Notification        Notification[]
   orderHistory        OrderHistory[]
   post        Post[]
+  orderSupport Order[] @relation("order_staff_support_id_fkey")
 
   @@index([email])
   @@map("users")
@@ -140,9 +141,11 @@ model Order {
   state       OrderState  @default(CREATED)
   description String?     @db.Text
   groupId     String?
+  staffSupportId          BigInt?
 
   group      Group?      @relation(fields: [groupId], references: [id])
   user       User        @relation(fields: [userId], references: [id])
+  staffSupport User?      @relation(fields: [staffSupportId], references: [id], name: "order_staff_support_id_fkey")
   orderItems OrderItem[]
   orderHistory OrderHistory[]
 
