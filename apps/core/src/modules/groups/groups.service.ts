@@ -157,12 +157,25 @@ export class GroupsService {
       user.role !== Role.ADMIN &&
       !user.permissions?.includes(PERMISSION_KEYS.GROUP_VIEW)
     ) {
-      where.id = {
-        in: [
-          ...(user.dataGroupIdsOrder || []),
-          ...(user.dataGroupIdsSupport || []),
-        ],
-      };
+      where.OR = [
+        {
+          id: {
+            in: [
+              ...(user.dataGroupIdsOrder || []),
+              ...(user.dataGroupIdsSupport || []),
+            ],
+          },
+        },
+        {
+          supportOrderGroup: {
+            some: {
+              orderGroupId: {
+                in: user.dataGroupIdsOrder || [],
+              },
+            },
+          },
+        },
+      ];
     }
 
     if (listGroupDto.status) {
