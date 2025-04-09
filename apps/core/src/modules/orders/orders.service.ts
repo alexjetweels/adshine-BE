@@ -53,6 +53,7 @@ export class OrdersService {
   }
 
   checkPermissionInGroup(groupId: string, user: AuthUser) {
+    if (user.role === Role.ADMIN) return;
     if (!user?.dataGroups?.[groupId]) {
       throw new ApiException(
         'Người dùng không thuộc group này',
@@ -95,6 +96,21 @@ export class OrdersService {
           HttpStatus.FORBIDDEN,
           ErrorCode.FORBIDDEN,
         );
+      }
+
+      if (
+        order.groupSupportId &&
+        !staffDataGroup.dataGroupUser[order.groupSupportId]
+      ) {
+        throw new ApiException(
+          'Staff không thuộc nhóm hỗ trợ cho nhóm này',
+          HttpStatus.FORBIDDEN,
+          ErrorCode.FORBIDDEN,
+        );
+      }
+
+      if (order.groupSupportId) {
+        order.groupSupportId = staffDataGroup.dataGroupIdsOrderSupport[0];
       }
     }
 
@@ -241,6 +257,12 @@ export class OrdersService {
             name: true,
           },
         },
+        groupSupport: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
       orderBy: {
         id: 'desc',
@@ -285,6 +307,39 @@ export class OrdersService {
     }
 
     const { orderItems, ...order } = body;
+
+    if (order.staffSupportId) {
+      const staffDataGroup = await this.jwtStrategy.getInfoGroupUser(
+        order.staffSupportId,
+      );
+
+      body.groupSupportId =
+        body.groupSupportId ||
+        orderCurrent.groupSupportId ||
+        staffDataGroup.dataGroupIdsOrderSupport[0];
+
+      if (
+        orderCurrent.groupId &&
+        !staffDataGroup.dataGroupIdsOrderSupport?.includes(orderCurrent.groupId)
+      ) {
+        throw new ApiException(
+          'Staff không thuộc nhóm hỗ trợ cho nhóm này',
+          HttpStatus.FORBIDDEN,
+          ErrorCode.FORBIDDEN,
+        );
+      }
+
+      if (
+        order.groupSupportId &&
+        !staffDataGroup.dataGroupUser[body.groupSupportId]
+      ) {
+        throw new ApiException(
+          'Staff không thuộc nhóm hỗ trợ cho nhóm này',
+          HttpStatus.FORBIDDEN,
+          ErrorCode.FORBIDDEN,
+        );
+      }
+    }
 
     return await this.prismaService.$transaction(async (prisma) => {
       await prisma.order.update({
