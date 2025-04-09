@@ -17,4 +17,4 @@ COPY apps/core/tsconfig.app.json dist/apps/core/
 RUN prisma generate 
 RUN yarn build:core
 
-CMD yarn prisma:migrate:deploy && yarn start:core:prod
+CMD yarn prisma generate && yarn prisma:migrate:deploy && yarn start:core:prod
