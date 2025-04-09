@@ -142,10 +142,12 @@ model Order {
   description String?     @db.Text
   groupId     String?
   staffSupportId          BigInt?
+  groupSupportId          String?
 
   group      Group?      @relation(fields: [groupId], references: [id])
   user       User        @relation(fields: [userId], references: [id])
   staffSupport User?      @relation(fields: [staffSupportId], references: [id], name: "order_staff_support_id_fkey")
+  groupSupport Group? @relation(fields: [groupSupportId], references: [id], name: "order_staff_support_id_fkey") 
   orderItems OrderItem[]
   orderHistory OrderHistory[]
 
@@ -291,6 +293,7 @@ model Group {
   supportOrderGroup SupportOrderGroup[] @relation("support_order_group_support_group_id_fkey")
   orderGroups       SupportOrderGroup[] @relation("support_order_group_order_group_id_fkey")
   Order             Order[]
+  orderSupport      Order[] @relation("order_staff_support_id_fkey")
 
   @@map("groups")
 }

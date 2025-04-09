@@ -94,4 +94,14 @@ export class CreateOrderDto {
   @IsInt()
   @Min(1)
   staffSupportId?: number;
+
+  @ApiProperty({
+    description: 'Group id suport order',
+    example: '46097793-3017-4a8f-bfa1-069e29dbd870',
+    required: false,
+    type: String,
+  })
+  @IsOptional()
+  @IsUUID('4')
+  groupSupportId?: string;
 }
