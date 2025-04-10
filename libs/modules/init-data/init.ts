@@ -70,6 +70,15 @@ export const PERMISSION_DEFAULT = {
   POST_CREATE_DOCUMENT: {
     description: 'Tạo bài viết tài liệu mới',
   },
+  POST_VIEW_TIP_TRICK: {
+    description: 'Chỉnh sửa bài viết tip trick',
+  },
+  POST_VIEW_SOFTWARE: {
+    description: 'Chỉnh sửa bài viết phần mềm tiện ích',
+  },
+  POST_VIEW_DOCUMENT: {
+    description: 'Chỉnh sửa bài viết tài liệu',
+  },
 };
 
 // PermissionDefaultType
