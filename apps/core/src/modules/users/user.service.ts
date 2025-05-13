@@ -1,5 +1,12 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { Role, StatusOrder, User } from '@prisma/client';
+import {
+  OrderType,
+  Role,
+  StatusGroup,
+  StatusOrder,
+  StatusUserGroup,
+  User,
+} from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
 import { ErrorCode } from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
@@ -92,6 +99,7 @@ export class UserService {
             select: {
               name: true,
               type: true,
+              status: true,
             },
           },
           userGroupSupport: {
@@ -137,15 +145,28 @@ export class UserService {
       skip: (query.page - 1) * query.limit,
       include: {
         UserGroup: {
+          where: {
+            status: StatusUserGroup.ACTIVE,
+            group: {
+              status: StatusGroup.ACTIVE,
+            },
+          },
           select: {
             id: true,
+            status: true,
+            group: {
+              select: {
+                id: true,
+                name: true,
+                status: true,
+              },
+            },
           },
         },
       },
     });
 
     const total = await this.prismaService.user.count({ where });
-
     const users = map(records, (record) => {
       return {
         id: record.id,
@@ -344,6 +365,7 @@ export class UserService {
           select: {
             totalPrice: true,
             state: true,
+            type: true,
             orderItems: {
               select: {
                 quantity: true,
@@ -378,7 +400,9 @@ export class UserService {
         }
 
         acc[order.state].count += 1;
-        acc[order.state].totalPrice += order.totalPrice;
+        const totalPriceHandle =
+          order.type === OrderType.BUY ? order.totalPrice : -order.totalPrice;
+        acc[order.state].totalPrice += totalPriceHandle;
         return acc;
       },
       {} as Record<
@@ -396,10 +420,11 @@ export class UserService {
         category: item.product.category.name,
         quantity: item.quantity,
         price: BigInt(item.price) * BigInt(item.quantity),
+        type: order.type,
       })),
     ).reduce(
       (acc, item) => {
-        const { category, state, quantity, price } = item;
+        const { category, state, quantity, price, type } = item;
 
         if (!acc[category]) {
           acc[category] = {};
@@ -412,8 +437,9 @@ export class UserService {
           };
         }
 
+        const priceHandle = type === OrderType.BUY ? price : -price;
         acc[category][state].totalQuantity += quantity;
-        acc[category][state].totalPrice += price;
+        acc[category][state].totalPrice += priceHandle;
 
         return acc;
       },

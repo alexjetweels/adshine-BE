@@ -46,7 +46,7 @@ export class GroupsService {
                  SELECT 1 FROM user_groups ug 
                  INNER JOIN groups g ON ug."groupId" = g.id
                  WHERE ug."userId" = u.id 
-                 AND g."status" = 'ACTIVE'
+                 AND g."status" = 'ACTIVE' AND ug."status" = 'ACTIVE'
                  ${optional?.excludeGroupId ? Prisma.sql`AND ug."groupId" != ${optional.excludeGroupId}` : Prisma.empty}
                  LIMIT 1
              ) AS "isGroup"

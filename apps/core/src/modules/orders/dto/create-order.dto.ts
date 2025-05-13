@@ -3,6 +3,7 @@ import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
+  IsEnum,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -12,7 +13,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-
+import { OrderType } from '@prisma/client';
 export class OrderItemDto {
   @ApiProperty({
     description: 'The product ID',
@@ -104,4 +105,14 @@ export class CreateOrderDto {
   @IsOptional()
   @IsUUID('4')
   groupSupportId?: string;
+
+  @ApiProperty({
+    description: 'Type order',
+    example: OrderType.BUY,
+    required: false,
+    enum: OrderType, // Change type to enum
+  })
+  @IsOptional()
+  @IsEnum(OrderType)
+  type?: OrderType;
 }

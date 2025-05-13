@@ -131,6 +131,11 @@ enum OrderState {
   UN_REMOVE
 }
 
+enum OrderType {
+  BUY
+  SUPPORT
+}
+
 model Order {
   id          BigInt      @id @default(autoincrement())
   userId      BigInt      @db.BigInt
@@ -139,6 +144,7 @@ model Order {
   updatedAt   DateTime    @updatedAt
   status      StatusOrder @default(ACTIVE)
   state       OrderState  @default(CREATED)
+  type        OrderType?   @default(BUY)
   description String?     @db.Text
   groupId     String?
   staffSupportId          BigInt?

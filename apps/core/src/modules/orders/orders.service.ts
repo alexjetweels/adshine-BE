@@ -3,6 +3,7 @@ import {
   GroupRole,
   Order,
   OrderState,
+  OrderType,
   Prisma,
   Role,
   StatusOrder,
@@ -668,7 +669,10 @@ export class OrdersService {
         }
 
         // Add the item to the respective groupId and date
-        acc[cur.groupId][date].total += cur.totalPrice;
+        const priceHandle =
+          cur.type === OrderType.BUY ? cur.totalPrice : -cur.totalPrice;
+
+        acc[cur.groupId][date].total += priceHandle;
         acc[cur.groupId][date].count += 1;
 
         return acc;

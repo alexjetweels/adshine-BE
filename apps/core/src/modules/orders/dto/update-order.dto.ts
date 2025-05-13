@@ -4,7 +4,7 @@ import { IsEnum, IsOptional } from 'class-validator';
 import { CreateOrderDto } from './create-order.dto';
 
 export class UpdateOrderDto extends PartialType(
-  OmitType(CreateOrderDto, ['groupId']),
+  OmitType(CreateOrderDto, ['groupId', 'type']),
 ) {
   @ApiProperty({
     description: 'remove order',
