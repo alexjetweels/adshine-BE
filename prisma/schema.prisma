@@ -36,6 +36,7 @@ model User {
   orderHistory        OrderHistory[]
   post        Post[]
   orderSupport Order[] @relation("order_staff_support_id_fkey")
+  userNotifications   UserNotification[]
 
   @@index([email])
   @@map("users")
@@ -376,3 +377,24 @@ model Post {
 
   @@map("posts")
 }
+
+
+model UserNotification {
+  id            String   @id @default(uuid())
+  userId        BigInt
+  title         String   @db.VarChar(255)
+  content       String   @db.VarChar(500)
+  type          Int      @db.SmallInt
+  isRead        Boolean  @default(false)
+  redirectType  Int?     @db.SmallInt
+  redirectId    String?  @db.VarChar(255)
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_notifications")
+  @@index([userId])
+}
+

@@ -57,4 +57,12 @@ export class NotificationsController {
   ) {
     return this.notificationsService.update(id, updateNotificationDto);
   }
+
+  @AuthV2()
+  @Get('my-notifications')
+  @ApiResponseCustom([responseListNotificationSuccess])
+  @HttpCode(HttpStatus.OK)
+  findUserNotifications(@Query() listNotificationDto: ListNotificationDto) {
+    return this.notificationsService.findUserNotifications(listNotificationDto);
+  }
 }

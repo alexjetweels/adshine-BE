@@ -13,6 +13,7 @@ import {
 } from './response/schema';
 import { AuthService } from './services/auth.service';
 import { interval, map, Observable, Subject } from 'rxjs';
+import { OneSignalService } from '../one-signal/one-signal.service';
 
 @CoreControllers({
   path: 'auth',

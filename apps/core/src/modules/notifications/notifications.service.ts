@@ -114,4 +114,29 @@ export class NotificationsService {
 
     return updateNotificationDto;
   }
+
+  async findUserNotifications(listNotificationDto: ListNotificationDto) {
+    const user = ContextProvider.getAuthUser<AuthUser>();
+
+    const where = { userId: user.id } as Prisma.UserNotificationWhereInput;
+
+    const records = await this.prismaService.userNotification.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: listNotificationDto.limit,
+      skip: (listNotificationDto.page - 1) * listNotificationDto.limit,
+    });
+
+    const total = await this.prismaService.userNotification.count({ where });
+
+    return schemaPaging({
+      data: records,
+      page: listNotificationDto.page,
+      limit: listNotificationDto.limit,
+      totalPage: Math.ceil(total / listNotificationDto.limit),
+      totalItems: total,
+    });
+  }
 }

@@ -46,3 +46,12 @@ export enum StatusLog {
 export enum Services {
   API_CORE = 'core',
 }
+
+export enum UserNotificationType {
+  NEW_ORDER = 1,
+  ORDER_COMPLETED = 2,
+}
+
+export enum UserNotificationRedirectType {
+  ORDER = 1,
+}

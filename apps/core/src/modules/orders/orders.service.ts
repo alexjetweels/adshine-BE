@@ -10,7 +10,11 @@ import {
 } from '@prisma/client';
 import { PERMISSION_KEYS } from 'libs/modules/init-data/init';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
-import { ErrorCode } from 'libs/utils/enum';
+import {
+  ErrorCode,
+  UserNotificationRedirectType,
+  UserNotificationType,
+} from 'libs/utils/enum';
 import { ApiException } from 'libs/utils/exception';
 import {
   AuthUser,
@@ -26,12 +30,14 @@ import { UpdateOrderStateDto } from './dto/update-order-state';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import moment from 'moment';
 import { JwtStrategy } from '../auth/strategies/jwt.strategy';
+import { OneSignalService } from '../one-signal/one-signal.service';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtStrategy: JwtStrategy,
+    private readonly oneSignalService: OneSignalService,
   ) {}
 
   async checkProductExist(productIds: bigint[]) {
@@ -127,6 +133,19 @@ export class OrdersService {
         },
       },
     });
+
+    if (staffSupportId) {
+      this.oneSignalService.sendNotification(
+        'Đơn hàng mới',
+        `Có 1 đơn hàng mới được tạo bởi ${user.email}`,
+        [staffSupportId],
+        {
+          type: UserNotificationType.NEW_ORDER,
+          redirectType: UserNotificationRedirectType.ORDER,
+          redirectId: newOrder.id,
+        },
+      );
+    }
 
     return newOrder;
   }
@@ -500,7 +519,7 @@ export class OrdersService {
     this.validatePermissionUpdateStateOrder(orderCurrent, user, body.state);
     this.validateUpdateStateOrder(orderCurrent, body.state);
 
-    return await this.prismaService.$transaction(async (prisma) => {
+    const data = await this.prismaService.$transaction(async (prisma) => {
       await prisma.order.update({
         where: { id },
         data: { state: body.state },
@@ -516,6 +535,21 @@ export class OrdersService {
 
       return body;
     });
+
+    if (body.state === OrderState.COMPLETED) {
+      this.oneSignalService.sendNotification(
+        'Đơn hàng đã hoàn thành',
+        `Đơn hàng ${id} đã hoàn thành bởi ${user.email}`,
+        [Number(orderCurrent.userId)],
+        {
+          type: UserNotificationType.ORDER_COMPLETED,
+          redirectType: UserNotificationRedirectType.ORDER,
+          redirectId: id,
+        },
+      );
+    }
+
+    return data;
   }
 
   async getHistoryOrder(query: HistoryOrderDto) {
