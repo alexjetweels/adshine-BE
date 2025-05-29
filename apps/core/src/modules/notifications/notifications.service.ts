@@ -1,21 +1,24 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { NotificationStatus, Prisma, Role, User } from '@prisma/client';
+import { NotificationStatus, Prisma, Role } from '@prisma/client';
 import { PrismaService } from 'libs/modules/prisma/prisma.service';
+import { ErrorCode, UserNotificationType } from 'libs/utils/enum';
+import { ApiException } from 'libs/utils/exception';
 import {
   AuthUser,
   ContextProvider,
 } from 'libs/utils/providers/context.provider';
 import { schemaPaging } from 'libs/utils/util';
+import { OneSignalService } from '../one-signal/one-signal.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { ListNotificationDto } from './dto/list-notifation.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
-import { ApiException } from 'libs/utils/exception';
-import { ErrorCode } from 'libs/utils/enum';
-import e from 'express';
 
 @Injectable()
 export class NotificationsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly oneSignalService: OneSignalService,
+  ) {}
 
   async create(createNotificationDto: CreateNotificationDto) {
     const user = ContextProvider.getAuthUser<AuthUser>();
@@ -138,5 +141,16 @@ export class NotificationsService {
       totalPage: Math.ceil(total / listNotificationDto.limit),
       totalItems: total,
     });
+  }
+
+  async testNotiOnSig() {
+    this.oneSignalService.sendNotification(
+      `Test Notification ${new Date().toDateString()}`,
+      `This is a test notification`,
+      [1],
+      {
+        type: UserNotificationType.TEST,
+      },
+    );
   }
 }

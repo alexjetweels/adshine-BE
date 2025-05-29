@@ -65,4 +65,11 @@ export class NotificationsController {
   findUserNotifications(@Query() listNotificationDto: ListNotificationDto) {
     return this.notificationsService.findUserNotifications(listNotificationDto);
   }
+
+  @AuthV2([PERMISSION_KEYS.NOTIFICATION_CREATE])
+  @Post('test-noti-on-sig')
+  @HttpCode(HttpStatus.OK)
+  createTestNotiOnSig() {
+    return this.notificationsService.testNotiOnSig();
+  }
 }

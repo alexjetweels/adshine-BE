@@ -48,6 +48,7 @@ export enum Services {
 }
 
 export enum UserNotificationType {
+  TEST = 0,
   NEW_ORDER = 1,
   ORDER_COMPLETED = 2,
 }

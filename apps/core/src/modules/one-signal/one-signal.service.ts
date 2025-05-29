@@ -47,17 +47,19 @@ export class OneSignalService implements OnModuleInit {
       redirectId?: any;
     },
   ) {
-    const redirectId = (params.redirectId?.toString() as string) || '0';
-    await this.prismaService.userNotification.createMany({
-      data: memberIds.map((memberId) => ({
-        userId: memberId,
-        title,
-        content,
-        type: params.type,
-        redirectType: params.redirectType,
-        redirectId: redirectId,
-      })),
-    });
+    if (params.type !== UserNotificationType.TEST) {
+      const redirectId = (params.redirectId?.toString() as string) || '0';
+      await this.prismaService.userNotification.createMany({
+        data: memberIds.map((memberId) => ({
+          userId: memberId,
+          title,
+          content,
+          type: params.type,
+          redirectType: params.redirectType,
+          redirectId: redirectId,
+        })),
+      });
+    }
 
     const memberIdChunk = this.chunkArray(memberIds, 100);
     for (let memberIdsItem of memberIdChunk) {
